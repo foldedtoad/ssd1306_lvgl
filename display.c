@@ -18,6 +18,7 @@ static char count_str[11] = {0};
 static struct device * display_dev;
 static lv_obj_t * hello_world_label;
 static lv_obj_t * count_label;
+static lv_obj_t * slider_label;
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -39,6 +40,21 @@ void display_play(void)
     }    
 }
 
+#if 0
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void display_slider_event(lv_obj_t * slider, lv_event_t event)
+{
+    static char buf [4];  // max 3 bytez for number + null-term byte.
+
+    if (event == LV_EVENT_VALUE_CHANGED) {
+        snprintf(buf, sizeof(buf), "%u", lv_slider_get_value(slider));
+        lv_label_set_text(slider_label, buf);
+    }
+}
+#endif
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -50,6 +66,23 @@ int display_init(void)
         LOG_ERR("device not found. %s", CONFIG_LVGL_DISPLAY_DEV_NAME);
         return -1;
     }
+
+    lv_obj_t * slider;
+
+    slider = lv_slider_create(lv_scr_act(), NULL);
+    lv_obj_set_height(slider, 10);
+    lv_obj_set_width(slider, 110);
+    lv_obj_align(slider, NULL, LV_ALIGN_IN_TOP_LEFT, 3, 0);
+    lv_slider_set_value(slider, 15, LV_ANIM_ON);
+
+#if 0
+    lv_obj_set_event_cb(slider, display_slider_event); 
+
+    slider_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(slider_label, "0");
+    //lv_obj_set_auto_realign(slider, true);
+    lv_obj_align(slider_label, slider, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+#endif
 
     hello_world_label = lv_label_create(lv_scr_act(), NULL);
 
