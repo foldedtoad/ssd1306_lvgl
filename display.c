@@ -18,7 +18,10 @@ static char count_str[11] = {0};
 static struct device * display_dev;
 static lv_obj_t * hello_world_label;
 static lv_obj_t * count_label;
+
+#if 0
 static lv_obj_t * slider_label;
+#endif
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
