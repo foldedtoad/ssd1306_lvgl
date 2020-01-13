@@ -19,6 +19,13 @@ static struct device * display_dev;
 static lv_obj_t * hello_world_label;
 static lv_obj_t * count_label;
 
+void display_timer_handler(struct k_timer * timer);
+void display_task_handler(struct k_work * work);
+
+K_TIMER_DEFINE(display_timer, display_timer_handler, NULL);
+
+K_WORK_DEFINE(display_work, display_task_handler);
+
 #if 0
 static lv_obj_t * slider_label;
 #endif
@@ -26,21 +33,23 @@ static lv_obj_t * slider_label;
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-void display_play(void)
+void display_task_handler(struct k_work * work)
 {
-    while (1) {
+    if ((count % 100) == 0U) {
+        sprintf(count_str, "%d", count/100U);
+        lv_label_set_text(count_label, count_str);
+    }
+    count++;
+    
+    lv_task_handler();
+}
 
-        if ((count % 100) == 0U) {
-            sprintf(count_str, "%d", count/100U);
-            lv_label_set_text(count_label, count_str);
-        }
-        
-        lv_task_handler();
-        
-        k_sleep(K_MSEC(10));
-        
-        ++count;
-    }    
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void display_timer_handler(struct k_timer * timer)
+{
+    k_work_submit(&display_work);
 }
 
 #if 0
@@ -98,6 +107,8 @@ int display_init(void)
     lv_obj_align(count_label, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
 
     display_blanking_off(display_dev);
+
+    k_timer_start(&display_timer, K_MSEC(10), K_MSEC(10));
 
     return 0;
 };

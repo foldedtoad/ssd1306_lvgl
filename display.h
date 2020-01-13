@@ -8,6 +8,5 @@
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 int  display_init(void);
-void display_play(void);
 
 #endif  /* __DISPLAY_H */

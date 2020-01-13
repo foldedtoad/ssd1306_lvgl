@@ -21,8 +21,6 @@ void main_thread(void * id, void * unused1, void * unused2)
 
     if (display_init() < 0)
     	return;
-
-    display_play();
 }
 
 K_THREAD_DEFINE(main_id, STACKSIZE, main_thread, 
