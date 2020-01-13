@@ -7,10 +7,5 @@ project(display)
 
 target_sources(app PRIVATE main.c)
 target_sources(app PRIVATE display.c)
-target_sources(app PRIVATE fonts/font5x7.c)
-target_sources(app PRIVATE fonts/font8x8.c)
-target_sources(app PRIVATE fonts/font10x16.c)
-target_sources(app PRIVATE fonts/font15x24.c)
-target_sources(app PRIVATE fonts/font20x32.c)
 
 target_include_directories(app PRIVATE ./)
