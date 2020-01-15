@@ -4,6 +4,7 @@
 #include <zephyr.h>
 #include <sys/printk.h>
 
+#include "buttons.h"
 #include "display.h"
 
 #include <logging/log.h>
@@ -18,6 +19,8 @@ LOG_MODULE_REGISTER(main, 3);
 void main_thread(void * id, void * unused1, void * unused2)
 {
     LOG_INF("%s", __func__);
+
+    buttons_init();
 
     if (display_init() < 0)
     	return;
