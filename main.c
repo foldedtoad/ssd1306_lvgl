@@ -23,7 +23,7 @@ void main_thread(void * id, void * unused1, void * unused2)
     buttons_init();
 
     if (display_init() < 0)
-    	return;
+        return;
 }
 
 K_THREAD_DEFINE(main_id, STACKSIZE, main_thread, 

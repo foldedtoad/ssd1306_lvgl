@@ -58,12 +58,12 @@ void display_slider_event(lv_obj_t * slider, lv_event_t event)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-static int my_btn_read(void)
+static int display_btn_read(void)
 {
     /*
      *  Use buttons_read() to get actual state of switch(es)
      */
-    return -1;
+    return buttons_get_state();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -73,16 +73,17 @@ bool display_buttons_read(lv_indev_drv_t * drv, lv_indev_data_t * data)
 {
     int btn_pr;
 
-    static uint32_t last_btn_id = 2; /* Store the last pressed button id */
+    static uint32_t last_btn_id = NO_PRESS; /* Store the last pressed button id */
 
-    btn_pr = my_btn_read();   /* Get the ID (0,1,2...) of the pressed button */
+    btn_pr = display_btn_read();  /* Get the ID (0,1,2...) of the pressed button */
 
     /*
      *  Is there a button press? 
      *    btn_pr >= 0 indicated button ID
      *    btn_pr = -1 indicated no button was pressed
      */
-    if (btn_pr >= 0) { 
+    if (btn_pr >= 0) {
+        LOG_INF("SW%d Pressed", (btn_pr + 1));
         last_btn_id = btn_pr;               /* Save the pressed button ID */
         data->state = LV_INDEV_STATE_PR;    /* Set the pressed state */
     }
