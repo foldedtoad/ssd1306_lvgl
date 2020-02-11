@@ -11,7 +11,7 @@
 #include <zephyr.h>
 
 #include "display.h"
-#include "buttons.h"
+#include "display_btn.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
@@ -26,11 +26,14 @@ K_TIMER_DEFINE(display_timer, display_timer_handler, NULL);
 
 K_WORK_DEFINE(display_work, display_task_handler);
 
+#define TICK_PERIOD   (10)
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 void display_task_handler(struct k_work * work)
 {
+    lv_tick_inc(TICK_PERIOD);
     lv_task_handler();
 }
 
@@ -58,47 +61,6 @@ void display_slider_event(lv_obj_t * slider, lv_event_t event)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-static int display_btn_read(void)
-{
-    /*
-     *  Use buttons_read() to get actual state of switch(es)
-     */
-    return buttons_get_state();
-}
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-bool display_buttons_read(lv_indev_drv_t * drv, lv_indev_data_t * data)
-{
-    int btn_pr;
-
-    static uint32_t last_btn_id = NO_PRESS; /* Store the last pressed button id */
-
-    btn_pr = display_btn_read();  /* Get the ID (0,1,2...) of the pressed button */
-
-    /*
-     *  Is there a button press? 
-     *    btn_pr >= 0 indicated button ID
-     *    btn_pr = -1 indicated no button was pressed
-     */
-    if (btn_pr >= 0) {
-        LOG_INF("SW%d Pressed", (btn_pr + 1));
-        last_btn_id = btn_pr;               /* Save the pressed button ID */
-        data->state = LV_INDEV_STATE_PR;    /* Set the pressed state */
-    }
-    else {
-        data->state = LV_INDEV_STATE_REL;   /* Set the released state */
-    }
-
-    data->btn_id = last_btn_id;   /* Return the last button ID */
-
-    return false;                 /* No buffering, so no more data read */
-}
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
 int display_init(void)
 {
     display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
@@ -107,6 +69,8 @@ int display_init(void)
         LOG_ERR("device not found. %s", CONFIG_LVGL_DISPLAY_DEV_NAME);
         return -1;
     }
+
+    lv_init();
 
     /* 
      *  Create slider object.
@@ -125,17 +89,10 @@ int display_init(void)
     lv_label_set_text(slider_label, "0");
     lv_obj_align(slider_label, slider, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
-    /*
-     *  Create input device and register it.
+    /* 
+     *  Initialize external hardware buttons
      */
-    lv_indev_drv_t indev_drv;
-
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.type = LV_INDEV_TYPE_BUTTON;
-    indev_drv.read_cb = display_buttons_read;
-
-    lv_indev_t * indev = lv_indev_drv_register(&indev_drv);
-    (void) indev;
+    display_btn_init();
 
     /*
      *  Turn on display
@@ -145,7 +102,7 @@ int display_init(void)
     /*
      *  Start task handler timer loop
      */
-    k_timer_start(&display_timer, K_MSEC(10), K_MSEC(10));
+    k_timer_start(&display_timer, K_MSEC(TICK_PERIOD), K_MSEC(TICK_PERIOD));
 
     return 0;
 };

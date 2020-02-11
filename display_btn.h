@@ -1,23 +1,12 @@
 /*
- *   buttons.h
+ *   display_btn.h
  */
-#ifndef __BUTTONS_H
-#define __BUTTONS_H
-
-
-enum {
-    SW1_ID  = 0,
-    SW2_ID  = 1,
-    SW3_ID  = 2,
-    SW4_ID  = 3,
-};
-
-#define NO_PRESS   (-1)
+#ifndef __DISPLAY_BTN_H
+#define __DISPLAY_BTN_H
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-void buttons_init(void);
-int  buttons_get_state(int id);
+void display_btn_init(void);
 
-#endif  /* __BUTTONS_H */
+#endif  /* __DISPLAY_BTN_H */

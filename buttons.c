@@ -18,10 +18,10 @@ LOG_MODULE_REGISTER(buttons, 3);
 /*---------------------------------------------------------------------------*/
 
 #define SW_GPIO_NAME    DT_GPIO_KEYS_SW0_GPIOS_CONTROLLER
-#define SW_0            DT_ALIAS_SW0_GPIOS_PIN
-#define SW_1            DT_ALIAS_SW1_GPIOS_PIN
-#define SW_2            DT_ALIAS_SW2_GPIOS_PIN
-#define SW_3            DT_ALIAS_SW3_GPIOS_PIN
+#define SW1_PIN         DT_ALIAS_SW0_GPIOS_PIN
+#define SW2_PIN         DT_ALIAS_SW1_GPIOS_PIN
+#define SW3_PIN         DT_ALIAS_SW2_GPIOS_PIN
+#define SW4_PIN         DT_ALIAS_SW3_GPIOS_PIN
 #define ACTIVE          GPIO_INT_ACTIVE_LOW
 #define PULL_UP         GPIO_PUD_PULL_UP
 
@@ -37,10 +37,10 @@ typedef struct {
 } button_info_t; 
 
 static const button_info_t button_info [] = {
-    { .id = SW1_ID, .pin = DT_ALIAS_SW0_GPIOS_PIN, .bit = 0x00002000, .name = "SW1" },
-    { .id = SW2_ID, .pin = DT_ALIAS_SW1_GPIOS_PIN, .bit = 0x00004000, .name = "SW2" },
-    { .id = SW3_ID, .pin = DT_ALIAS_SW2_GPIOS_PIN, .bit = 0x00008000, .name = "SW3" },
-    { .id = SW4_ID, .pin = DT_ALIAS_SW3_GPIOS_PIN, .bit = 0x00010000, .name = "SW4" },
+    { .id = SW1_ID, .pin = SW1_PIN, .bit = 0x00002000, .name = "SW1" },
+    { .id = SW2_ID, .pin = SW2_PIN, .bit = 0x00004000, .name = "SW2" },
+    { .id = SW3_ID, .pin = SW3_PIN, .bit = 0x00008000, .name = "SW3" },
+    { .id = SW4_ID, .pin = SW4_PIN, .bit = 0x00010000, .name = "SW4" },
 };
 #define BUTTONS_COUNT (sizeof(button_info)/sizeof(button_info_t))
 
@@ -52,17 +52,18 @@ static struct device * gpiob;
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-int buttons_get_state(void)
+int buttons_get_state(int id)
 {
     int state;
 
-    for (int i=0; i < BUTTONS_COUNT; i++) {
+    if (id <0 || id >= BUTTONS_COUNT) {
+        return -1;
+    }
 
-        gpio_pin_read(gpiob, button_info[i].pin, &state);
+    gpio_pin_read(gpiob, button_info[id].pin, &state);
 
-        if (state == 0) {  // note button-pressed state inversion
-            return button_info[i].id;
-        }
+    if (state == 0) {  // note button-pressed state inversion
+        return button_info[id].id;
     }
     return NO_PRESS;
 }
@@ -78,8 +79,8 @@ void buttons_init(void)
         return;
     }
 
-    gpio_pin_configure(gpiob, SW_0, GPIO_DIR_IN | PULL_UP | ACTIVE);
-    gpio_pin_configure(gpiob, SW_1, GPIO_DIR_IN | PULL_UP | ACTIVE);
-    gpio_pin_configure(gpiob, SW_2, GPIO_DIR_IN | PULL_UP | ACTIVE);
-    gpio_pin_configure(gpiob, SW_3, GPIO_DIR_IN | PULL_UP | ACTIVE);
+    gpio_pin_configure(gpiob, SW1_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
+    gpio_pin_configure(gpiob, SW2_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
+    gpio_pin_configure(gpiob, SW3_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
+    gpio_pin_configure(gpiob, SW4_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
 }
