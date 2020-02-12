@@ -17,34 +17,61 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display_btn, 3);
 
+static lv_obj_t * btn1; 
+static lv_obj_t * btn2; 
+static lv_obj_t * btn3; 
+static lv_obj_t * btn4; 
+
+void display_slider_update(int sw_id);
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 static void btn1_click_action(lv_obj_t * btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        LOG_INF("BUTTON-1 action");
+        //LOG_INF("SW1 action");
+
+        lv_btn_set_ink_in_time(btn1, 400);
+        lv_btn_set_ink_wait_time(btn1, 600);
+        lv_btn_set_ink_out_time(btn1, 400);
+
+        display_slider_update(SW1_ID);
     }
 }
 
 static void btn2_click_action(lv_obj_t * btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        LOG_INF("BUTTON-2 action");
+        //LOG_INF("SW2 action");
+
+        lv_btn_set_ink_in_time(btn2, 400);
+        lv_btn_set_ink_wait_time(btn2, 600);
+        lv_btn_set_ink_out_time(btn2, 400);
+
+        display_slider_update(SW2_ID);
     }
 }
 
 static void btn3_click_action(lv_obj_t * btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        LOG_INF("BUTTON-3 action");
+        //LOG_INF("SW3 action");
+
+        lv_btn_set_ink_in_time(btn3, 400);
+        lv_btn_set_ink_wait_time(btn3, 600);
+        lv_btn_set_ink_out_time(btn3, 400);
     }
 }
 
 static void btn4_click_action(lv_obj_t * btn, lv_event_t event)
 {
     if (event == LV_EVENT_CLICKED) {
-        LOG_INF("BUTTON-4 action");
+        //LOG_INF("SW4 action");
+
+        lv_btn_set_ink_in_time(btn4, 400);
+        lv_btn_set_ink_wait_time(btn4, 600);
+        lv_btn_set_ink_out_time(btn4, 400);
     }
 }
 
@@ -220,23 +247,27 @@ void display_btn_init(void)
     /*
      *  Define button(s)
      */
-    lv_obj_t * btn1 = lv_btn_create(lv_scr_act(), NULL);
+    btn1 = lv_btn_create(lv_scr_act(), NULL);
     lv_obj_set_pos( btn1, 30, 15);    /* Set its position */
     lv_obj_set_size(btn1, 15, 15);    /* Set its size */
+    lv_btn_set_style(btn1, LV_BTN_STYLE_REL, &lv_style_btn_tgl_rel);
     lv_obj_set_event_cb(btn1, btn1_click_action);
 
-    lv_obj_t * btn2 = lv_btn_create(lv_scr_act(), btn1);
+    btn2 = lv_btn_create(lv_scr_act(), btn1);
     lv_obj_set_pos( btn2, 50, 15);    /* Set its position */
     lv_obj_set_size(btn2, 15, 15);    /* Set its size */
+    lv_btn_set_style(btn2, LV_BTN_STYLE_REL, &lv_style_btn_tgl_rel);
     lv_obj_set_event_cb(btn2, btn2_click_action);
 
-    lv_obj_t * btn3 = lv_btn_create(lv_scr_act(), btn1);
+    btn3 = lv_btn_create(lv_scr_act(), btn1);
     lv_obj_set_pos( btn3, 70, 15);    /* Set its position */
     lv_obj_set_size(btn3, 15, 15);    /* Set its size */
+    lv_btn_set_style(btn3, LV_BTN_STYLE_REL, &lv_style_btn_tgl_rel);
     lv_obj_set_event_cb(btn3, btn3_click_action);
 
-    lv_obj_t * btn4 = lv_btn_create(lv_scr_act(), btn1);
+    btn4 = lv_btn_create(lv_scr_act(), btn1);
     lv_obj_set_pos( btn4, 90, 15);    /* Set its position */
     lv_obj_set_size(btn4, 15, 15);    /* Set its size */
+    lv_btn_set_style(btn4, LV_BTN_STYLE_REL, &lv_style_btn_tgl_rel);
     lv_obj_set_event_cb(btn4, btn4_click_action);
 }

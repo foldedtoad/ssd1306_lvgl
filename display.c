@@ -12,11 +12,13 @@
 
 #include "display.h"
 #include "display_btn.h"
+#include "buttons.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
 
 static struct device * display_dev;
+static lv_obj_t      * slider;
 static lv_obj_t      * slider_label;
 
 void display_timer_handler(struct k_timer * timer);
@@ -48,14 +50,38 @@ void display_timer_handler(struct k_timer * timer)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-void display_slider_event(lv_obj_t * slider, lv_event_t event)
+void display_slider_label_update(void)
 {
-    static char buf [4];  // max 3 bytez for number + null-term byte.
+    static char buf [4];  // max 3 bytes for number + null-term byte.
 
-    if (event == LV_EVENT_VALUE_CHANGED) {
-        snprintf(buf, sizeof(buf), "%u", lv_slider_get_value(slider));
-        lv_label_set_text(slider_label, buf);
+    snprintf(buf, sizeof(buf), "%u", lv_slider_get_value(slider));
+    lv_label_set_text(slider_label, buf);
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void display_slider_update(int sw_id)
+{
+    int value = lv_slider_get_value(slider);
+
+    switch (sw_id) {
+
+        case SW1_ID:
+            value += 5;
+            lv_slider_set_value(slider, value, LV_ANIM_ON);
+            break;
+
+        case SW2_ID:
+            value -= 5;
+            lv_slider_set_value(slider, value, LV_ANIM_ON);
+            break;
+
+        default:
+            break;
     }
+
+    display_slider_label_update();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -75,19 +101,16 @@ int display_init(void)
     /* 
      *  Create slider object.
      */
-    lv_obj_t * slider;
-
     slider = lv_slider_create(lv_scr_act(), NULL);
     lv_obj_set_height(slider, 10);
     lv_obj_set_width(slider, 110);
     lv_obj_align(slider, NULL, LV_ALIGN_IN_TOP_LEFT, 3, 0);
-    lv_slider_set_value(slider, 15, LV_ANIM_ON);
-
-    lv_obj_set_event_cb(slider, display_slider_event); 
+    lv_slider_set_value(slider, 10, LV_ANIM_ON);
 
     slider_label = lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(slider_label, "0");
     lv_obj_align(slider_label, slider, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+    display_slider_label_update();
 
     /* 
      *  Initialize external hardware buttons
