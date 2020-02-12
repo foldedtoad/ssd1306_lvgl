@@ -88,11 +88,6 @@ int display_init(void)
     lv_label_set_text(slider_label, "0");
     lv_obj_align(slider_label, slider, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
-    /* 
-     *  Initialize external hardware buttons
-     */
-    display_btn_init();
-
     /*
      *  Turn on display
      */
