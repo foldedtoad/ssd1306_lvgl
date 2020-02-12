@@ -11,7 +11,6 @@
 #include <zephyr.h>
 
 #include "display.h"
-#include "display_btn.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
@@ -88,11 +87,6 @@ int display_init(void)
     slider_label = lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(slider_label, "0");
     lv_obj_align(slider_label, slider, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
-
-    /* 
-     *  Initialize external hardware buttons
-     */
-    display_btn_init();
 
     /*
      *  Turn on display
