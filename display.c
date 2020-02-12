@@ -11,7 +11,6 @@
 #include <zephyr.h>
 
 #include "display.h"
-#include "display_btn.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
