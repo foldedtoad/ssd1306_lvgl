@@ -11,6 +11,7 @@
 #include <zephyr.h>
 
 #include "display.h"
+#include "buttons.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
@@ -42,6 +43,32 @@ void display_task_handler(struct k_work * work)
 void display_timer_handler(struct k_timer * timer)
 {
     k_work_submit(&display_work);
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void display_btn_event(buttons_id_t btn_id)
+{
+    LOG_INF("%s: BTN%d", __func__, btn_id);
+    
+    switch (btn_id) {
+
+        case BTN1_ID:
+            break;
+
+        case BTN2_ID:
+            break;
+
+        case BTN3_ID:
+            break;
+
+        case BTN4_ID:
+            break;
+
+        default:
+            break;
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -92,6 +119,11 @@ int display_init(void)
      *  Turn on display
      */
     display_blanking_off(display_dev);
+
+    /* 
+     * Register for button press notifications.
+     */
+    buttons_register_notify_handler(display_btn_event);
 
     /*
      *  Start task handler timer loop
