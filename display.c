@@ -19,10 +19,9 @@ LOG_MODULE_REGISTER(display, 3);
 static struct device * display_dev;
 static lv_obj_t      * slider_label;
 
-static lv_obj_t * screen1;
-static lv_obj_t * screen2;
-static lv_obj_t * screen3;
-static lv_obj_t * screen4;
+#define SCREEN_COUNT   4
+
+static lv_obj_t * screens [SCREEN_COUNT];
 
 void display_timer_handler(struct k_timer * timer);
 void display_task_handler(struct k_work * work);
@@ -59,20 +58,21 @@ void display_btn_event(buttons_id_t btn_id)
     
     switch (btn_id) {
 
-        case BTN1_ID:
-            lv_scr_load(screen1);
+        case BTN1_ID: {
+            static int index = 0;  // init to first screen
+            index++;
+            if (index >= SCREEN_COUNT) index = 0;
+            lv_scr_load(screens[index]);
             break;
+        }
 
         case BTN2_ID:
-            lv_scr_load(screen2);
             break;
 
         case BTN3_ID:
-            lv_scr_load(screen3);
             break;
 
         case BTN4_ID:
-            lv_scr_load(screen4);
             break;
 
         default:
@@ -98,30 +98,30 @@ void display_slider_event(lv_obj_t * slider, lv_event_t event)
 /*---------------------------------------------------------------------------*/
 void display_screens_init(void)
 {
-    screen1 = lv_obj_create(NULL, NULL);
-    screen2 = lv_obj_create(NULL, NULL);
-    screen3 = lv_obj_create(NULL, NULL);
-    screen4 = lv_obj_create(NULL, NULL);
+    screens[0] = lv_obj_create(NULL, NULL);
+    screens[1] = lv_obj_create(NULL, NULL);
+    screens[2] = lv_obj_create(NULL, NULL);
+    screens[3] = lv_obj_create(NULL, NULL);
 
-    lv_scr_load(screen1);
+    lv_scr_load(screens[0]);
+    lv_obj_t * screen0_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen0_label, "Pg1");
+    lv_obj_align(screen0_label, screens[0], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+
+    lv_scr_load(screens[1]);
     lv_obj_t * screen1_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen1_label, "Pg1");
-    lv_obj_align(screen1_label, screen1, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_label_set_text(screen1_label, "Pg2");
+    lv_obj_align(screen1_label, screens[1], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
-    lv_scr_load(screen2);
+    lv_scr_load(screens[2]);
     lv_obj_t * screen2_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_label, "Pg2");
-    lv_obj_align(screen2_label, screen2, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_label_set_text(screen2_label, "Pg3");
+    lv_obj_align(screen2_label, screens[2], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
-    lv_scr_load(screen3);
+    lv_scr_load(screens[3]);
     lv_obj_t * screen3_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen3_label, "Pg3");
-    lv_obj_align(screen3_label, screen3, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
-
-    lv_scr_load(screen4);
-    lv_obj_t * screen4_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen4_label, "Pg4");
-    lv_obj_align(screen4_label, screen4, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_label_set_text(screen3_label, "Pg4");
+    lv_obj_align(screen3_label, screens[3], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 }
 
 
@@ -144,7 +144,7 @@ int display_init(void)
     /*
      *  First screen will be screen1
      */
-    lv_scr_load(screen1);
+    lv_scr_load(screens[0]);
 
     /* 
      *  Create slider object.
