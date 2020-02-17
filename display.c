@@ -33,6 +33,8 @@ K_WORK_DEFINE(display_work, display_task_handler);
 #define TICK_PERIOD   (10)
 
 LV_IMG_DECLARE(icon1);
+LV_IMG_DECLARE(icon2);
+LV_IMG_DECLARE(icon3);
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -121,8 +123,8 @@ void display_screens_init(void)
     lv_label_set_text(screen1_label, "Pg2");
     lv_obj_align(screen1_label, screens[1], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
-    lv_obj_t * icon = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(icon, &icon1);
+    lv_obj_t * icon_1 = lv_img_create(lv_scr_act(), NULL);
+    lv_img_set_src(icon_1, &icon1);
 
     /*
      *  build basic screen2
@@ -132,6 +134,9 @@ void display_screens_init(void)
     lv_label_set_text(screen2_label, "Pg3");
     lv_obj_align(screen2_label, screens[2], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
+    lv_obj_t * icon_2 = lv_img_create(lv_scr_act(), NULL);
+    lv_img_set_src(icon_2, &icon2);
+
     /*
      *  build basic screen3
      */
@@ -139,8 +144,10 @@ void display_screens_init(void)
     lv_obj_t * screen3_label = lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(screen3_label, "Pg4");
     lv_obj_align(screen3_label, screens[3], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
-}
 
+    lv_obj_t * icon_3 = lv_img_create(lv_scr_act(), NULL);
+    lv_img_set_src(icon_3, &icon3);
+}
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
