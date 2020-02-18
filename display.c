@@ -115,6 +115,21 @@ void display_screens_init(void)
     lv_label_set_text(screen0_label, "Pg1");
     lv_obj_align(screen0_label, screens[0], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
+    /* 
+     *  Create slider object.
+     */
+    lv_obj_t * slider = lv_slider_create(lv_scr_act(), NULL);
+    lv_obj_set_height(slider, 10);
+    lv_obj_set_width(slider, 110);
+    lv_obj_align(slider, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_slider_set_value(slider, 15, LV_ANIM_ON);
+
+    lv_obj_set_event_cb(slider, display_slider_event); 
+
+    slider_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(slider_label, "0");
+    lv_obj_align(slider_label, slider, LV_ALIGN_IN_BOTTOM_LEFT, 0, 10);
+
     /*
      *  build basic screen1
      */
@@ -125,6 +140,7 @@ void display_screens_init(void)
 
     lv_obj_t * icon_1 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_1, &icon1);
+    lv_obj_align(icon_1, NULL, LV_ALIGN_CENTER, 0, 0);
 
     /*
      *  build basic screen2
@@ -136,6 +152,7 @@ void display_screens_init(void)
 
     lv_obj_t * icon_2 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_2, &icon2);
+    lv_obj_align(icon_2, NULL, LV_ALIGN_CENTER, 0, 0);
 
     /*
      *  build basic screen3
@@ -147,6 +164,7 @@ void display_screens_init(void)
 
     lv_obj_t * icon_3 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_3, &icon3);
+    lv_obj_align(icon_3, NULL, LV_ALIGN_CENTER, 0, 0);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -169,21 +187,6 @@ int display_init(void)
      *  First screen will be screen1
      */
     lv_scr_load(screens[0]);
-
-    /* 
-     *  Create slider object.
-     */
-    lv_obj_t * slider = lv_slider_create(lv_scr_act(), NULL);
-    lv_obj_set_height(slider, 10);
-    lv_obj_set_width(slider, 110);
-    lv_obj_align(slider, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_slider_set_value(slider, 15, LV_ANIM_ON);
-
-    lv_obj_set_event_cb(slider, display_slider_event); 
-
-    slider_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(slider_label, "0");
-    lv_obj_align(slider_label, slider, LV_ALIGN_IN_BOTTOM_LEFT, 0, 10);
 
     /*
      *  Turn on display
