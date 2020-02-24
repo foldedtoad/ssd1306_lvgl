@@ -19,17 +19,29 @@ LOG_MODULE_REGISTER(display, 3);
 static struct device * display_dev;
 static lv_obj_t      * slider_label;
 
+static lv_obj_t   * screen1_value0_label; 
+static int          screen1_value0 = 0;
 static lv_obj_t   * screen1_value1_label; 
 static int          screen1_value1 = 0;
-static lv_obj_t   * screen1_value2_label; 
-static int          screen1_value2 = 0;
+
+static lv_obj_t   * screen2_value0_label; 
+static int          screen2_value0 = 0;
+static lv_obj_t   * screen2_value1_label; 
+static int          screen2_value1 = 0;
+static lv_obj_t   * screen2_value2_label; 
+static int          screen2_value2 = 0;
 
 #define SCREEN_ID_0    0
 #define SCREEN_ID_1    1
 #define SCREEN_ID_2    2
 #define SCREEN_ID_3    3
-
 #define SCREEN_COUNT   4
+
+#define PARAM_ID_0      0
+#define PARAM_ID_1      1
+#define PARAM_ID_2      2
+#define PARAM_ID_3      3
+#define PARAM_COUNT     3  //4
 
 static lv_obj_t * screens [SCREEN_COUNT];
 
@@ -66,10 +78,39 @@ void display_timer_handler(struct k_timer * timer)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
+void display_set_selected(lv_obj_t * label, bool select)
+{
+    static lv_style_t style1;
+
+    lv_style_copy(&style1, &lv_style_plain);
+
+    if (select) {
+        LOG_INF("%s: select %p", __func__, label);
+        style1.text.color = LV_COLOR_WHITE;
+        style1.body.main_color = LV_COLOR_BLACK;
+        style1.body.grad_color = LV_COLOR_BLACK;
+
+        lv_obj_set_style(label, &style1);
+        lv_label_set_body_draw(label, true);
+    }
+    else {
+        LOG_INF("%s: unselect %p", __func__, label);
+        style1.text.color = LV_COLOR_BLACK;
+        style1.body.main_color = LV_COLOR_WHITE;
+        style1.body.grad_color = LV_COLOR_WHITE;
+
+        lv_obj_set_style(label, &style1);
+        lv_label_set_body_draw(label, false);
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
 void display_btn_event(buttons_id_t btn_id)
 {
     static int screen_id = 0;  // init to first screen id
-    static int param_idx = 0;  // init to first parameter index
+    static int param_id  = 0;  // init to first parameter index
     
     LOG_INF("%s: BTN%d", __func__, btn_id);
     
@@ -84,10 +125,10 @@ void display_btn_event(buttons_id_t btn_id)
         }
 
         case BTN2_ID:
-            param_idx++;
-            if (param_idx >= 2)  param_idx = 0;
-            if (param_idx <= 0)  param_idx = 0;
-            LOG_INF("param_idx(%d)", param_idx);
+            param_id++;
+            if (param_id >= PARAM_COUNT)  param_id = 0;
+            if (param_id <= 0)            param_id = 0;
+            LOG_INF("param_id(%d)", param_id);
             break;
 
         case BTN3_ID:
@@ -97,9 +138,18 @@ void display_btn_event(buttons_id_t btn_id)
                     break;
 
                 case SCREEN_ID_1:
-                    switch (param_idx)
+                    switch (param_id)
                     {
-                        case 0: {
+                        case PARAM_ID_0: {
+                            char buf [4];
+                            screen1_value0++;
+                            if (screen1_value0 > 999)
+                                screen1_value0 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen1_value0);
+                            lv_label_set_text(screen1_value0_label, buf); 
+                            break;
+                        }
+                        case 1: {
                             char buf [4];
                             screen1_value1++;
                             if (screen1_value1 > 999)
@@ -108,21 +158,44 @@ void display_btn_event(buttons_id_t btn_id)
                             lv_label_set_text(screen1_value1_label, buf); 
                             break;
                         }
-                        case 1: {
-                            char buf [4];
-                            screen1_value2++;
-                            if (screen1_value2 > 999)
-                                screen1_value2 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen1_value2);
-                            lv_label_set_text(screen1_value2_label, buf); 
-                            break;
-                        }
                         default:
                             break;
                     }
                     break;
 
                 case SCREEN_ID_2:
+                    switch (param_id)
+                    {
+                        case PARAM_ID_0: {
+                            char buf [4];
+                            screen2_value0++;
+                            if (screen2_value0 > 999)
+                                screen2_value0 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen2_value0);
+                            lv_label_set_text(screen2_value0_label, buf); 
+                            break;
+                        }
+                        case PARAM_ID_1: {
+                            char buf [4];
+                            screen2_value1++;
+                            if (screen2_value1 > 999)
+                                screen2_value1 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen2_value1);
+                            lv_label_set_text(screen2_value1_label, buf); 
+                            break;
+                        }
+                        case PARAM_ID_2: {
+                            char buf [4];
+                            screen2_value2++;
+                            if (screen2_value2 > 999)
+                                screen2_value2 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen2_value2);
+                            lv_label_set_text(screen2_value2_label, buf); 
+                            break;
+                        }
+                        default:
+                            break;
+                    }
                     break;
                 case SCREEN_ID_3:
                     break;
@@ -138,9 +211,18 @@ void display_btn_event(buttons_id_t btn_id)
                     break;
 
                 case SCREEN_ID_1:
-                    switch (param_idx)
+                    switch (param_id)
                     {
-                        case 0: {
+                        case PARAM_ID_0: {
+                            char buf [4];
+                            screen1_value0--;
+                            if (screen1_value0 <= 0)
+                                screen1_value0 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen1_value0);
+                            lv_label_set_text(screen1_value0_label, buf); 
+                            break;
+                        }
+                        case PARAM_ID_1: {
                             char buf [4];
                             screen1_value1--;
                             if (screen1_value1 <= 0)
@@ -149,13 +231,39 @@ void display_btn_event(buttons_id_t btn_id)
                             lv_label_set_text(screen1_value1_label, buf); 
                             break;
                         }
-                        case 1: {
+                        default:
+                            break;
+                    }
+                    break;
+
+                case SCREEN_ID_2:
+                    switch (param_id)
+                    {
+                        case PARAM_ID_0: {
                             char buf [4];
-                            screen1_value2--;
-                            if (screen1_value2 <= 0)
-                                screen1_value2 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen1_value2);
-                            lv_label_set_text(screen1_value2_label, buf); 
+                            screen2_value0--;
+                            if (screen2_value0 <= 0)
+                                screen2_value0 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen2_value0);
+                            lv_label_set_text(screen2_value0_label, buf); 
+                            break;
+                        }
+                        case PARAM_ID_1: {
+                            char buf [4];
+                            screen2_value1--;
+                            if (screen2_value1 <= 0)
+                                screen2_value1 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen2_value1);
+                            lv_label_set_text(screen2_value1_label, buf); 
+                            break;
+                        }
+                        case PARAM_ID_2: {
+                            char buf [4];
+                            screen2_value2--;
+                            if (screen2_value2 <= 0)
+                                screen2_value2 = 0;
+                            snprintf(buf, sizeof(buf), "%u", screen2_value2);
+                            lv_label_set_text(screen2_value2_label, buf); 
                             break;
                         }
                         default:
@@ -163,10 +271,9 @@ void display_btn_event(buttons_id_t btn_id)
                     }
                     break;
 
-                case SCREEN_ID_2:
-                    break;
                 case SCREEN_ID_3:
                     break;
+
                 default:
                     break;
             }
@@ -231,13 +338,13 @@ void display_screens_init(void)
     lv_label_set_text(screen1_label1, "Pg2");
     lv_obj_align(screen1_label1, screens[1], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
+    screen1_value0_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen1_value0_label, "0");
+    lv_obj_align(screen1_value0_label, screens[1], LV_ALIGN_IN_BOTTOM_LEFT, 5, -5);
+
     screen1_value1_label = lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(screen1_value1_label, "0");
-    lv_obj_align(screen1_value1_label, screens[1], LV_ALIGN_IN_BOTTOM_LEFT, 5, -5);
-
-    screen1_value2_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen1_value2_label, "0");
-    lv_obj_align(screen1_value2_label, screens[1], LV_ALIGN_IN_BOTTOM_RIGHT, -15, -5);
+    lv_obj_align(screen1_value1_label, screens[1], LV_ALIGN_IN_BOTTOM_RIGHT, -15, -5);
 
     lv_obj_t * icon_1 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_1, &icon1);
@@ -251,9 +358,37 @@ void display_screens_init(void)
     lv_label_set_text(screen2_label, "Pg3");
     lv_obj_align(screen2_label, screens[2], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
+
+    lv_obj_t * screen2_value0_name = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value0_name, "value-0");
+    lv_obj_align(screen2_value0_name, screens[2], LV_ALIGN_IN_TOP_RIGHT, -70, 2);
+
+    screen2_value0_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value0_label, "0");
+    lv_obj_align(screen2_value0_label, screens[2], LV_ALIGN_IN_TOP_RIGHT, -35, 2);
+
+
+    lv_obj_t * screen2_value1_name = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value1_name, "value-1");
+    lv_obj_align(screen2_value1_name, screens[2], LV_ALIGN_IN_RIGHT_MID, -70, 0);
+
+    screen2_value1_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value1_label, "0");
+    lv_obj_align(screen2_value1_label, screens[2], LV_ALIGN_IN_RIGHT_MID, -35, 0);
+
+
+    lv_obj_t * screen2_value2_name = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value2_name, "value-2");
+    lv_obj_align(screen2_value2_name, screens[2], LV_ALIGN_IN_BOTTOM_RIGHT, -70, -2);
+
+    screen2_value2_label = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value2_label, "0");
+    lv_obj_align(screen2_value2_label, screens[2], LV_ALIGN_IN_BOTTOM_RIGHT, -35, -2);
+
+#if 0
     lv_obj_t * icon_2 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_2, &icon2);
-    lv_obj_align(icon_2, NULL, LV_ALIGN_CENTER, 0, 0);
+#endif
 
     /*
      *  build basic screen3
