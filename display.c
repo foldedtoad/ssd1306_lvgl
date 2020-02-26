@@ -76,6 +76,7 @@ void display_timer_handler(struct k_timer * timer)
     k_work_submit(&display_work);
 }
 
+#if 0
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -104,6 +105,119 @@ void display_set_selected(lv_obj_t * label, bool select)
         lv_label_set_body_draw(label, false);
     }
 }
+#endif
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+
+static lv_obj_t   * screen0_slider_field;
+static lv_obj_t   * screen0_slider_obj;
+
+static lv_obj_t   * screen1_value0_obj; 
+static int          screen1_value0_field = 0;
+static lv_obj_t   * screen1_value1_obj; 
+static int          screen1_value1_field = 0;
+
+static lv_obj_t   * screen2_value0_obj; 
+static int          screen2_value0_field = 0;
+static lv_obj_t   * screen2_value1_obj; 
+static int          screen2_value1_field = 0;
+static lv_obj_t   * screen2_value2_obj; 
+static int          screen2_value2_field = 0;
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+
+typedef struct {
+    lv_obj_t      * object; 
+    short           field;
+    short           step;
+    short           max;
+    short           min;
+} param_t;
+
+typedef struct {
+    param_t * params;
+    int       count;
+} screens_t;
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+
+static lv_obj_t   * screen0_slider_label_obj;
+static lv_obj_t   * screen0_slider_obj;
+
+static lv_obj_t   * screen1_value0_obj; 
+static int          screen1_value0_field = 0;
+static lv_obj_t   * screen1_value1_obj; 
+static int          screen1_value1_field = 0;
+
+static lv_obj_t   * screen2_value0_obj; 
+static int          screen2_value0_field = 0;
+static lv_obj_t   * screen2_value1_obj; 
+static int          screen2_value1_field = 0;
+static lv_obj_t   * screen2_value2_obj; 
+static int          screen2_value2_field = 0;
+
+static param_t screen0_objs [] {
+    { .object = screen0_slider_label,  .field = screen0_slider_value, .step = 5, .max = 100, .min = 0},
+};
+
+static param_t screen1_objs [] {
+    { .object = screen1_value0_label, .field = screen1_value0, .step = 1, .max = 999, .min = 0 },
+    { .object = screen1_value1_label, .field = screen1_value1, .step = 1, .max = 999, .min = 0 },
+};
+
+static param_t screen2_objs [] {
+    { .object = screen2_value0_label, .field = screen2_value0, .step = 1, .max = 999, .min = 0 },
+    { .object = screen2_value1_label, .field = screen2_value1, .step = 1, .max = 999, .min = 0 },
+    { .object = screen2_value2_label, .field = screen2_value2, .step = 1, .max = 999, .min = 0 },
+};
+
+static param_t screen3_objs [] {
+    { .object = NULL, .field = NULL, .step = 0, .max = 0, .min = 0},
+};
+
+static screen_t screens [] = {
+    { .params = screen0_objs, .count = 1 },
+    { .params = screen1_objs, .count = 2 },
+    { .params = screen2_objs, .count = 3 },
+    { .params = screen3_objs, .count = 0 },
+};
+#define SCREENS_COUNT (sizeof(screens)/sizeof(screens[0]))
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void display_param_update(param_t * param, bool inc)
+{
+    char str [4];
+    lv_obj_type_t * type;
+
+    if (param == NULL || param->object == NULL)
+        return;
+
+    if (inc) param->field += param->step;
+    else     param->field -= param->step;
+
+    if (param->value <= param->min) param->value = param->min;
+    if (param->value >  param->max) param->value = param->max;
+
+    lv_obj_get_type(param->object, &type);
+
+    switch (type.type[0]) {
+
+    }
+
+
+    snprintf(str, sizeof(str), "%u", param->value);
+    lv_label_set_text(param->field, str);
+
+    lv_slider_set_value(param->object, param->value, LV_ANIM_ON);
+}
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -117,202 +231,49 @@ void display_btn_event(buttons_id_t btn_id)
     
     switch (btn_id) {
 
-        case BTN1_ID: {
+        case BTN1_ID:
             screen_id++;
             if (screen_id >= SCREEN_COUNT)
                 screen_id = 0;
             lv_scr_load(screens[screen_id]);
             break;
-        }
 
         case BTN2_ID:
             param_id++;
             if (param_id >= PARAM_COUNT)  param_id = 0;
             if (param_id <= 0)            param_id = 0;
             LOG_INF("param_id(%d)", param_id);
+
+#if 0
+            /**
+             * @brief Set the selection start index.
+             * @param label pointer to a label object.
+             * @param index index to set. `LV_LABEL_TXT_SEL_OFF` to select nothing.
+             */
+            void lv_label_set_text_sel_start(param->object, 0);
+
+            /**
+             * @brief Set the selection end index.
+             * @param label pointer to a label object.
+             * @param index index to set. `LV_LABEL_TXT_SEL_OFF` to select nothing.
+             */
+            void lv_label_set_text_sel_end(param->object, 4);
+#endif
             break;
 
         case BTN3_ID:
-            switch (screen_id)
-            {
-                case SCREEN_ID_0: {
-                    static char buf [4];
-                    int value = lv_slider_get_value(slider);
-                    value += 5;
-                    if (value <= 0)  value = 0;
-                    if (value > 100) value = 100;
-                    snprintf(buf, sizeof(buf), "%u", value);
-                    lv_label_set_text(slider_label, buf);
-                    lv_slider_set_value(slider, value, LV_ANIM_ON);
-                    break;
-                }
-
-                case SCREEN_ID_1:
-                    switch (param_id)
-                    {
-                        case PARAM_ID_0: {
-                            char buf [4];
-                            screen1_value0++;
-                            if (screen1_value0 > 999)
-                                screen1_value0 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen1_value0);
-                            lv_label_set_text(screen1_value0_label, buf); 
-                            break;
-                        }
-                        case PARAM_ID_1: {
-                            char buf [4];
-                            screen1_value1++;
-                            if (screen1_value1 > 999)
-                                screen1_value1 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen1_value1);
-                            lv_label_set_text(screen1_value1_label, buf); 
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    break;
-
-                case SCREEN_ID_2:
-                    switch (param_id)
-                    {
-                        case PARAM_ID_0: {
-                            char buf [4];
-                            screen2_value0++;
-                            if (screen2_value0 > 999)
-                                screen2_value0 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen2_value0);
-                            lv_label_set_text(screen2_value0_label, buf); 
-                            break;
-                        }
-                        case PARAM_ID_1: {
-                            char buf [4];
-                            screen2_value1++;
-                            if (screen2_value1 > 999)
-                                screen2_value1 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen2_value1);
-                            lv_label_set_text(screen2_value1_label, buf); 
-                            break;
-                        }
-                        case PARAM_ID_2: {
-                            char buf [4];
-                            screen2_value2++;
-                            if (screen2_value2 > 999)
-                                screen2_value2 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen2_value2);
-                            lv_label_set_text(screen2_value2_label, buf); 
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    break;
-                case SCREEN_ID_3:
-                    break;
-                default:
-                    break;
+            if (screens[screen_id].count > 0) {
+                display_param_update(screens[screen_id].params[param_id], true);
             }
             break;
 
         case BTN4_ID:
-            switch (screen_id)
-            {
-                case SCREEN_ID_0: {
-                    static char buf [4];
-                    int value = lv_slider_get_value(slider);
-                    value -= 5;
-                    if (value <= 0)  value = 0;
-                    if (value > 100) value = 100;
-                    snprintf(buf, sizeof(buf), "%u", value);
-                    lv_label_set_text(slider_label, buf);
-                    lv_slider_set_value(slider, value, LV_ANIM_ON);
-                    break;
-                }
-
-                case SCREEN_ID_1:
-                    switch (param_id)
-                    {
-                        case PARAM_ID_0: {
-                            char buf [4];
-                            screen1_value0--;
-                            if (screen1_value0 <= 0)
-                                screen1_value0 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen1_value0);
-                            lv_label_set_text(screen1_value0_label, buf); 
-                            break;
-                        }
-                        case PARAM_ID_1: {
-                            char buf [4];
-                            screen1_value1--;
-                            if (screen1_value1 <= 0)
-                                screen1_value1 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen1_value1);
-                            lv_label_set_text(screen1_value1_label, buf); 
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    break;
-
-                case SCREEN_ID_2:
-                    switch (param_id)
-                    {
-                        case PARAM_ID_0: {
-                            char buf [4];
-                            screen2_value0--;
-                            if (screen2_value0 <= 0)
-                                screen2_value0 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen2_value0);
-                            lv_label_set_text(screen2_value0_label, buf); 
-                            break;
-                        }
-                        case PARAM_ID_1: {
-                            char buf [4];
-                            screen2_value1--;
-                            if (screen2_value1 <= 0)
-                                screen2_value1 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen2_value1);
-                            lv_label_set_text(screen2_value1_label, buf); 
-                            break;
-                        }
-                        case PARAM_ID_2: {
-                            char buf [4];
-                            screen2_value2--;
-                            if (screen2_value2 <= 0)
-                                screen2_value2 = 0;
-                            snprintf(buf, sizeof(buf), "%u", screen2_value2);
-                            lv_label_set_text(screen2_value2_label, buf); 
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                    break;
-
-                case SCREEN_ID_3:
-                    break;
-
-                default:
-                    break;
+            if (screens[screen_id].count > 0) {
+                display_param_update(screens[screen_id].params[param_id], false);
             }
-            break;
 
         default:
             break;
-    }
-}
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-void display_slider_event(lv_obj_t * slider, lv_event_t event)
-{
-    static char buf [4];  // max 3 bytes for number + null-term byte.
-
-    if (event == LV_EVENT_VALUE_CHANGED) {
-        snprintf(buf, sizeof(buf), "%u", lv_slider_get_value(slider));
-        lv_label_set_text(slider_label, buf);
     }
 }
 
@@ -340,13 +301,11 @@ void display_screens_init(void)
     /* 
      *  Create slider object.
      */
-    slider = lv_slider_create(lv_scr_act(), NULL);
+    screen0_slider = lv_slider_create(lv_scr_act(), NULL);
     lv_obj_set_height(slider, 10);
     lv_obj_set_width(slider, 110);
     lv_obj_align(slider, NULL, LV_ALIGN_CENTER, 0, 0);
     lv_slider_set_value(slider, 15, LV_ANIM_ON);
-
-    lv_obj_set_event_cb(slider, display_slider_event); 
 
     slider_label = lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(slider_label, "15");
