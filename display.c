@@ -17,20 +17,6 @@
 LOG_MODULE_REGISTER(display, 3);
 
 static struct device * display_dev;
-static lv_obj_t      * slider_label;
-static lv_obj_t      * slider;
-
-static lv_obj_t   * screen1_value0_label; 
-static int          screen1_value0 = 0;
-static lv_obj_t   * screen1_value1_label; 
-static int          screen1_value1 = 0;
-
-static lv_obj_t   * screen2_value0_label; 
-static int          screen2_value0 = 0;
-static lv_obj_t   * screen2_value1_label; 
-static int          screen2_value1 = 0;
-static lv_obj_t   * screen2_value2_label; 
-static int          screen2_value2 = 0;
 
 #define SCREEN_ID_0    0
 #define SCREEN_ID_1    1
@@ -44,7 +30,6 @@ static int          screen2_value2 = 0;
 #define PARAM_ID_3      3
 #define PARAM_COUNT     3  //4
 
-static lv_obj_t * screens [SCREEN_COUNT];
 
 void display_timer_handler(struct k_timer * timer);
 void display_task_handler(struct k_work * work);
@@ -76,147 +61,104 @@ void display_timer_handler(struct k_timer * timer)
     k_work_submit(&display_work);
 }
 
-#if 0
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-void display_set_selected(lv_obj_t * label, bool select)
-{
-    static lv_style_t style1;
-
-    lv_style_copy(&style1, &lv_style_plain);
-
-    if (select) {
-        LOG_INF("%s: select %p", __func__, label);
-        style1.text.color = LV_COLOR_WHITE;
-        style1.body.main_color = LV_COLOR_BLACK;
-        style1.body.grad_color = LV_COLOR_BLACK;
-
-        lv_obj_set_style(label, &style1);
-        lv_label_set_body_draw(label, true);
-    }
-    else {
-        LOG_INF("%s: unselect %p", __func__, label);
-        style1.text.color = LV_COLOR_BLACK;
-        style1.body.main_color = LV_COLOR_WHITE;
-        style1.body.grad_color = LV_COLOR_WHITE;
-
-        lv_obj_set_style(label, &style1);
-        lv_label_set_body_draw(label, false);
-    }
-}
-#endif
-
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-
-static lv_obj_t   * screen0_slider_field;
-static lv_obj_t   * screen0_slider_obj;
-
-static lv_obj_t   * screen1_value0_obj; 
-static int          screen1_value0_field = 0;
-static lv_obj_t   * screen1_value1_obj; 
-static int          screen1_value1_field = 0;
-
-static lv_obj_t   * screen2_value0_obj; 
-static int          screen2_value0_field = 0;
-static lv_obj_t   * screen2_value1_obj; 
-static int          screen2_value1_field = 0;
-static lv_obj_t   * screen2_value2_obj; 
-static int          screen2_value2_field = 0;
-
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 
 typedef struct {
-    lv_obj_t      * object; 
-    short           field;
+    lv_obj_t     ** object; 
+    short         * value;
     short           step;
     short           max;
     short           min;
 } param_t;
 
 typedef struct {
-    param_t * params;
-    int       count;
+    lv_obj_t * screen;
+    int        count;
+    param_t  * params;
 } screens_t;
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 
-static lv_obj_t   * screen0_slider_label_obj;
 static lv_obj_t   * screen0_slider_obj;
+static short        screen0_slider_value;
 
-static lv_obj_t   * screen1_value0_obj; 
-static int          screen1_value0_field = 0;
-static lv_obj_t   * screen1_value1_obj; 
-static int          screen1_value1_field = 0;
+static lv_obj_t   * screen1_label0_obj; 
+static short        screen1_label0_value = 0;
+static lv_obj_t   * screen1_label1_obj; 
+static short        screen1_label1_value = 0;
 
-static lv_obj_t   * screen2_value0_obj; 
-static int          screen2_value0_field = 0;
-static lv_obj_t   * screen2_value1_obj; 
-static int          screen2_value1_field = 0;
-static lv_obj_t   * screen2_value2_obj; 
-static int          screen2_value2_field = 0;
+static lv_obj_t   * screen2_label0_obj; 
+static short        screen2_label0_value = 0;
+static lv_obj_t   * screen2_label1_obj; 
+static short        screen2_label1_value = 0;
+static lv_obj_t   * screen2_label2_obj; 
+static short        screen2_label2_value = 0;
 
-static param_t screen0_objs [] {
-    { .object = screen0_slider_label,  .field = screen0_slider_value, .step = 5, .max = 100, .min = 0},
+static param_t screen0_elements [] = {
+    { .object = &screen0_slider_obj,  .value = &screen0_slider_value, .step = 5, .max = 100, .min = 0},
 };
 
-static param_t screen1_objs [] {
-    { .object = screen1_value0_label, .field = screen1_value0, .step = 1, .max = 999, .min = 0 },
-    { .object = screen1_value1_label, .field = screen1_value1, .step = 1, .max = 999, .min = 0 },
+static param_t screen1_elements[] = {
+    { .object = &screen1_label0_obj, .value = &screen1_label0_value, .step = 1, .max = 999, .min = 0 },
+    { .object = &screen1_label1_obj, .value = &screen1_label1_value, .step = 1, .max = 999, .min = 0 },
 };
 
-static param_t screen2_objs [] {
-    { .object = screen2_value0_label, .field = screen2_value0, .step = 1, .max = 999, .min = 0 },
-    { .object = screen2_value1_label, .field = screen2_value1, .step = 1, .max = 999, .min = 0 },
-    { .object = screen2_value2_label, .field = screen2_value2, .step = 1, .max = 999, .min = 0 },
+static param_t screen2_elements [] = {
+    { .object = &screen2_label0_obj, .value = &screen2_label0_value, .step = 1, .max = 999, .min = 0 },
+    { .object = &screen2_label1_obj, .value = &screen2_label1_value, .step = 1, .max = 999, .min = 0 },
+    { .object = &screen2_label2_obj, .value = &screen2_label2_value, .step = 1, .max = 999, .min = 0 },
 };
 
-static param_t screen3_objs [] {
-    { .object = NULL, .field = NULL, .step = 0, .max = 0, .min = 0},
+static param_t screen3_elements [] = {
+    { .object = NULL, .value = NULL, .step = 0, .max = 0, .min = 0},
 };
 
-static screen_t screens [] = {
-    { .params = screen0_objs, .count = 1 },
-    { .params = screen1_objs, .count = 2 },
-    { .params = screen2_objs, .count = 3 },
-    { .params = screen3_objs, .count = 0 },
+static screens_t screens [] = {
+    { .screen = NULL, .count = 1, .params = screen0_elements },
+    { .screen = NULL, .count = 2, .params = screen1_elements },
+    { .screen = NULL, .count = 3, .params = screen2_elements },
+    { .screen = NULL, .count = 0, .params = screen3_elements },
 };
 #define SCREENS_COUNT (sizeof(screens)/sizeof(screens[0]))
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-void display_param_update(param_t * param, bool inc)
+void display_param_update(int screen_id, int param_id, bool inc)
 {
-    char str [4];
-    lv_obj_type_t * type;
+    lv_obj_type_t types;
 
-    if (param == NULL || param->object == NULL)
+    //LOG_INF("%s: screen_id(%u), param_id(%d)", __func__, screen_id, param_id);
+
+    param_t * param = &screens[screen_id].params[param_id];
+
+    if (param == NULL || *param->object == NULL)
         return;
 
-    if (inc) param->field += param->step;
-    else     param->field -= param->step;
+    lv_obj_get_type(*param->object, &types);
+    //LOG_INF("%s: type: %s", __func__, types.type[0]);
 
-    if (param->value <= param->min) param->value = param->min;
-    if (param->value >  param->max) param->value = param->max;
+    if (inc) *param->value += param->step;
+    else     *param->value -= param->step;
 
-    lv_obj_get_type(param->object, &type);
+    if (*param->value <= param->min)  *param->value = param->min;
+    if (*param->value >  param->max)  *param->value = param->max;
 
-    switch (type.type[0]) {
-
+    if (strcmp("lv_label", types.type[0]) == 0) {
+        static char value[4];
+        snprintf(value, sizeof(value), "%u", *param->value);
+        lv_label_set_text(*param->object, value);
+        return;
     }
 
-
-    snprintf(str, sizeof(str), "%u", param->value);
-    lv_label_set_text(param->field, str);
-
-    lv_slider_set_value(param->object, param->value, LV_ANIM_ON);
+    if (strcmp("lv_slider", types.type[0]) == 0) {
+        lv_slider_set_value(*param->object, *param->value, LV_ANIM_ON);
+        return;
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -226,7 +168,7 @@ void display_btn_event(buttons_id_t btn_id)
 {
     static int screen_id = 0;  // init to first screen id
     static int param_id  = 0;  // init to first parameter index
-    
+
     LOG_INF("%s: BTN%d", __func__, btn_id);
     
     switch (btn_id) {
@@ -235,7 +177,7 @@ void display_btn_event(buttons_id_t btn_id)
             screen_id++;
             if (screen_id >= SCREEN_COUNT)
                 screen_id = 0;
-            lv_scr_load(screens[screen_id]);
+            lv_scr_load(screens[screen_id].screen);
             break;
 
         case BTN2_ID:
@@ -243,33 +185,17 @@ void display_btn_event(buttons_id_t btn_id)
             if (param_id >= PARAM_COUNT)  param_id = 0;
             if (param_id <= 0)            param_id = 0;
             LOG_INF("param_id(%d)", param_id);
-
-#if 0
-            /**
-             * @brief Set the selection start index.
-             * @param label pointer to a label object.
-             * @param index index to set. `LV_LABEL_TXT_SEL_OFF` to select nothing.
-             */
-            void lv_label_set_text_sel_start(param->object, 0);
-
-            /**
-             * @brief Set the selection end index.
-             * @param label pointer to a label object.
-             * @param index index to set. `LV_LABEL_TXT_SEL_OFF` to select nothing.
-             */
-            void lv_label_set_text_sel_end(param->object, 4);
-#endif
             break;
 
         case BTN3_ID:
             if (screens[screen_id].count > 0) {
-                display_param_update(screens[screen_id].params[param_id], true);
+                display_param_update(screen_id, param_id, true);
             }
             break;
 
         case BTN4_ID:
             if (screens[screen_id].count > 0) {
-                display_param_update(screens[screen_id].params[param_id], false);
+                display_param_update(screen_id, param_id, false);
             }
 
         default:
@@ -282,10 +208,10 @@ void display_btn_event(buttons_id_t btn_id)
 /*---------------------------------------------------------------------------*/
 void display_screens_init(void)
 {
-    screens[0] = lv_obj_create(NULL, NULL);
-    screens[1] = lv_obj_create(NULL, NULL);
-    screens[2] = lv_obj_create(NULL, NULL);
-    screens[3] = lv_obj_create(NULL, NULL);
+    screens[0].screen = lv_obj_create(NULL, NULL);
+    screens[1].screen = lv_obj_create(NULL, NULL);
+    screens[2].screen = lv_obj_create(NULL, NULL);
+    screens[3].screen = lv_obj_create(NULL, NULL);
 
     lv_theme_t * mono = lv_theme_mono_init(0, NULL);
     lv_theme_set_current(mono);
@@ -293,39 +219,33 @@ void display_screens_init(void)
     /*
      *  build basic screen0
      */
-    lv_scr_load(screens[0]);
+    lv_scr_load(screens[0].screen);
     lv_obj_t * screen0_label = lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(screen0_label, "Pg1");
-    lv_obj_align(screen0_label, screens[0], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_obj_align(screen0_label, screens[0].screen, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
-    /* 
-     *  Create slider object.
-     */
-    screen0_slider = lv_slider_create(lv_scr_act(), NULL);
-    lv_obj_set_height(slider, 10);
-    lv_obj_set_width(slider, 110);
-    lv_obj_align(slider, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_slider_set_value(slider, 15, LV_ANIM_ON);
-
-    slider_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(slider_label, "15");
-    lv_obj_align(slider_label, slider, LV_ALIGN_IN_BOTTOM_LEFT, 0, 10);
+    screen0_slider_obj = lv_slider_create(lv_scr_act(), NULL);
+    lv_obj_set_height(screen0_slider_obj, 10);
+    lv_obj_set_width(screen0_slider_obj, 110);
+    lv_obj_align(screen0_slider_obj, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_slider_set_value(screen0_slider_obj, 15, LV_ANIM_ON);
+    screen0_slider_value = 15;
 
     /*
      *  build basic screen1
      */
-    lv_scr_load(screens[1]);
-    lv_obj_t * screen1_label1 = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen1_label1, "Pg2");
-    lv_obj_align(screen1_label1, screens[1], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_scr_load(screens[1].screen);
+    lv_obj_t * screen1_page = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen1_page, "Pg2");
+    lv_obj_align(screen1_page, screens[1].screen, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
-    screen1_value0_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen1_value0_label, "0");
-    lv_obj_align(screen1_value0_label, screens[1], LV_ALIGN_IN_BOTTOM_LEFT, 5, -5);
+    screen1_label0_obj = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen1_label0_obj, "0");
+    lv_obj_align(screen1_label0_obj, screens[1].screen, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5);
 
-    screen1_value1_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen1_value1_label, "0");
-    lv_obj_align(screen1_value1_label, screens[1], LV_ALIGN_IN_BOTTOM_RIGHT, -15, -5);
+    screen1_label1_obj = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen1_label1_obj, "0");
+    lv_obj_align(screen1_label1_obj, screens[1].screen, LV_ALIGN_IN_BOTTOM_RIGHT, -15, -5);
 
     lv_obj_t * icon_1 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_1, &icon1);
@@ -334,36 +254,37 @@ void display_screens_init(void)
     /*
      *  build basic screen2
      */
-    lv_scr_load(screens[2]);
-    lv_obj_t * screen2_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_label, "Pg3");
-    lv_obj_align(screen2_label, screens[2], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_scr_load(screens[2].screen);
+    lv_obj_t * screen2_page = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_page, "Pg3");
+    lv_obj_align(screen2_page, screens[2].screen, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
-    lv_obj_t * screen2_value0_name = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_value0_name, "value-0");
-    lv_obj_align(screen2_value0_name, screens[2], LV_ALIGN_IN_TOP_RIGHT, -70, 2);
+    //
+    lv_obj_t * screen2_label0_tag = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_label0_tag, "value-0");
+    lv_obj_align(screen2_label0_tag, screens[2].screen, LV_ALIGN_IN_TOP_RIGHT, -70, 2);
 
-    screen2_value0_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_value0_label, "0");
-    lv_obj_align(screen2_value0_label, screens[2], LV_ALIGN_IN_TOP_RIGHT, -45, 2);
+    screen2_label0_obj = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_label0_obj, "0");
+    lv_obj_align(screen2_label0_obj, screens[2].screen, LV_ALIGN_IN_TOP_RIGHT, -45, 2);
 
-    lv_obj_t * screen2_value1_name = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_value1_name, "value-1");
-    lv_obj_align(screen2_value1_name, screens[2], LV_ALIGN_IN_RIGHT_MID, -70, 0);
+    //
+    lv_obj_t * screen2_label1_tag = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_label1_tag, "value-1");
+    lv_obj_align(screen2_label1_tag, screens[2].screen, LV_ALIGN_IN_RIGHT_MID, -70, 0);
 
-    screen2_value1_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_value1_label, "0");
-    lv_obj_align(screen2_value1_label, screens[2], LV_ALIGN_IN_RIGHT_MID, -45, 0);
+    screen2_label1_obj = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_label1_obj, "0");
+    lv_obj_align(screen2_label1_obj, screens[2].screen, LV_ALIGN_IN_RIGHT_MID, -45, 0);
 
-    lv_obj_t * screen2_value2_name = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_value2_name, "value-2");
-    lv_obj_align(screen2_value2_name, screens[2], LV_ALIGN_IN_BOTTOM_RIGHT, -70, -2);
+    //
+    lv_obj_t * screen2_value2_tag = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_value2_tag, "value-2");
+    lv_obj_align(screen2_value2_tag, screens[2].screen, LV_ALIGN_IN_BOTTOM_RIGHT, -70, -2);
 
-    screen2_value2_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen2_value2_label, "0");
-    lv_obj_align(screen2_value2_label, screens[2], LV_ALIGN_IN_BOTTOM_RIGHT, -45, -2);
-
-    //display_set_selected(screen2_value0_label, true);
+    screen2_label2_obj = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen2_label2_obj, "0");
+    lv_obj_align(screen2_label2_obj, screens[2].screen, LV_ALIGN_IN_BOTTOM_RIGHT, -45, -2);
 
 #if 0
     lv_obj_t * icon_2 = lv_img_create(lv_scr_act(), NULL);
@@ -373,10 +294,10 @@ void display_screens_init(void)
     /*
      *  build basic screen3
      */
-    lv_scr_load(screens[3]);
-    lv_obj_t * screen3_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(screen3_label, "Pg4");
-    lv_obj_align(screen3_label, screens[3], LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    lv_scr_load(screens[3].screen);
+    lv_obj_t * screen3_page = lv_label_create(lv_scr_act(), NULL);
+    lv_label_set_text(screen3_page, "Pg4");
+    lv_obj_align(screen3_page, screens[3].screen, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
 
     lv_obj_t * icon_3 = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(icon_3, &icon3);
@@ -402,7 +323,7 @@ int display_init(void)
     /*
      *  First screen will be screen1
      */
-    lv_scr_load(screens[0]);
+    lv_scr_load(screens[0].screen);
 
     /*
      *  Turn on display
