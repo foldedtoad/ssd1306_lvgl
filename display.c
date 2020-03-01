@@ -169,7 +169,7 @@ void display_btn_event(buttons_id_t btn_id)
     static int screen_id = 0;  // init to first screen id
     static int param_id  = 0;  // init to first parameter index
 
-    LOG_INF("%s: BTN%d", __func__, btn_id);
+    //LOG_INF("%s: BTN%d", __func__, btn_id);
     
     switch (btn_id) {
 
@@ -178,24 +178,27 @@ void display_btn_event(buttons_id_t btn_id)
             if (screen_id >= SCREEN_COUNT)
                 screen_id = 0;
             lv_scr_load(screens[screen_id].screen);
+            LOG_INF("BTN1: screen_id(%d)", screen_id);
             break;
 
         case BTN2_ID:
             param_id++;
-            if (param_id >= PARAM_COUNT)  param_id = 0;
-            if (param_id <= 0)            param_id = 0;
-            LOG_INF("param_id(%d)", param_id);
+            if (param_id >= screens[screen_id].count)  param_id = 0;
+            if (param_id < 0)                          param_id = 0;
+            LOG_INF("BTN2: screen_id(%d) param_id(%d)", screen_id, param_id);
             break;
 
         case BTN3_ID:
             if (screens[screen_id].count > 0) {
                 display_param_update(screen_id, param_id, true);
+                LOG_INF("BTN3: +%d", screens[screen_id].params[param_id].step);
             }
             break;
 
         case BTN4_ID:
             if (screens[screen_id].count > 0) {
                 display_param_update(screen_id, param_id, false);
+                LOG_INF("BTN3: -%d", screens[screen_id].params[param_id].step);
             }
 
         default:
