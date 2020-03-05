@@ -37,10 +37,10 @@ typedef struct {
 } button_info_t; 
 
 static const button_info_t button_info [] = {
-    { .id = BTN1_ID, .pin = SW0_PIN, .bit = 0x00002000, .name = "BTN1" },
-    { .id = BTN2_ID, .pin = SW1_PIN, .bit = 0x00004000, .name = "BTN2" },
-    { .id = BTN3_ID, .pin = SW2_PIN, .bit = 0x00008000, .name = "BTN3" },
-    { .id = BTN4_ID, .pin = SW3_PIN, .bit = 0x00010000, .name = "BTN4" },
+    { .id = BTN1_ID, .pin = SW0_PIN, .bit = 0x00020000, .name = "BTN1" },
+    { .id = BTN2_ID, .pin = SW1_PIN, .bit = 0x00040000, .name = "BTN2" },
+    { .id = BTN3_ID, .pin = SW2_PIN, .bit = 0x00080000, .name = "BTN3" },
+    { .id = BTN4_ID, .pin = SW3_PIN, .bit = 0x00100000, .name = "BTN4" },
 };
 #define BUTTONS_COUNT (sizeof(button_info)/sizeof(button_info_t))
 

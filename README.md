@@ -1,7 +1,7 @@
 # ssd1306_zephyr
 
 ## Overview
-This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (nRF52832) board running Zephyr version 2.1.
+This project implements a SSD1306 OLED display connected to a nRF51 PCA10028 (nRF52822) board running Zephyr version 2.2.
 In theory, this project could be ported to other Zephyr-supported boards, but this has not (yet) been tried.
 
 Also this project shows how to include custom fonts.
@@ -17,15 +17,15 @@ Below is a list hardware components.
 
 Wire connections as follows
 
- * P0.27 <--> SCL
- * P0.26 <--> SDA
+ * P0.07 <--> SCL
+ * P0.30 <--> SDA
  * P0.02 <--> RST  (optional)
  * VDD   <--> Vin
  * GND   <--> GND
 
 ## Software
-This project was built with Zephyr 2.1.99 and selects the Nordic PCA10040 board ().  
-Change the "`set(BOARD nrf52_pca10040)`" in the CMakeFile.txt for other supported boards. 
+This project was built with Zephyr 2.2 and selects the Nordic PCA10028 board ().  
+Change the "`set(BOARD nrf51_pca10028)`" in the CMakeFile.txt for other supported boards. 
 
 The following componets need to be configured though "make menuconfig".  
 
@@ -37,7 +37,7 @@ The following componets need to be configured though "make menuconfig".
 The tricky part of the software configuration seems to be in setting up the **.overlay* file and the *prj.conf* file.  This requires some knowledge about the build-configuration process for zephyr.  
 Hopefully, this project can be used as an example of how to navigate though this procedure.
 
-The difficult parts are setting up the I2C driver for the target board. In this project the nRF52 I2C support is well-known and relatively straight-forward in configuring.  Other SOCs and boards are not always so easy.
+The difficult parts are setting up the I2C driver for the target board. In this project the nRF51 I2C support is well-known and relatively straight-forward in configuring.  Other SOCs and boards are not always so easy.
 
 
 ## Operation

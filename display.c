@@ -198,7 +198,7 @@ void display_btn_event(buttons_id_t btn_id)
         case BTN4_ID:
             if (screens[screen_id].count > 0) {
                 display_param_update(screen_id, param_id, false);
-                LOG_INF("BTN3: -%d", screens[screen_id].params[param_id].step);
+                LOG_INF("BTN4: -%d", screens[screen_id].params[param_id].step);
             }
 
         default:
