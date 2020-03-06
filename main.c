@@ -4,8 +4,8 @@
 #include <zephyr.h>
 #include <sys/printk.h>
 
-#include "buttons.h"
 #include "display.h"
+#include "buttons.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(main, 3);

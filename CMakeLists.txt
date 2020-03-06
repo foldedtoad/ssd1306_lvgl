@@ -8,5 +8,8 @@ project(display)
 target_sources(app PRIVATE main.c)
 target_sources(app PRIVATE buttons.c)
 target_sources(app PRIVATE display.c)
+target_sources(app PRIVATE icon1.c)
+target_sources(app PRIVATE icon2.c)
+target_sources(app PRIVATE icon3.c)
 
 target_include_directories(app PRIVATE ./)

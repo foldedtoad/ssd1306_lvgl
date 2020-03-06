@@ -18,54 +18,102 @@ LOG_MODULE_REGISTER(buttons, 3);
 /*---------------------------------------------------------------------------*/
 
 #define SW_GPIO_NAME    DT_GPIO_KEYS_SW0_GPIOS_CONTROLLER
-#define SW1_PIN         DT_ALIAS_SW0_GPIOS_PIN
-#define SW2_PIN         DT_ALIAS_SW1_GPIOS_PIN
-#define SW3_PIN         DT_ALIAS_SW2_GPIOS_PIN
-#define SW4_PIN         DT_ALIAS_SW3_GPIOS_PIN
-#define ACTIVE          GPIO_INT_ACTIVE_LOW
-#define PULL_UP         GPIO_PUD_PULL_UP
+
+#define SW0_PIN         DT_ALIAS_SW0_GPIOS_PIN
+#define SW1_PIN         DT_ALIAS_SW1_GPIOS_PIN
+#define SW2_PIN         DT_ALIAS_SW2_GPIOS_PIN
+#define SW3_PIN         DT_ALIAS_SW3_GPIOS_PIN
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 
 typedef struct {
-    int     id;
+    u8_t    id;
     u8_t    pin;
     u32_t   bit;
     char  * name;
 } button_info_t; 
 
 static const button_info_t button_info [] = {
-    { .id = SW1_ID, .pin = SW1_PIN, .bit = 0x00002000, .name = "SW1" },
-    { .id = SW2_ID, .pin = SW2_PIN, .bit = 0x00004000, .name = "SW2" },
-    { .id = SW3_ID, .pin = SW3_PIN, .bit = 0x00008000, .name = "SW3" },
-    { .id = SW4_ID, .pin = SW4_PIN, .bit = 0x00010000, .name = "SW4" },
+    { .id = BTN1_ID, .pin = SW0_PIN, .bit = BIT(SW0_PIN), .name = "BTN1" },
+    { .id = BTN2_ID, .pin = SW1_PIN, .bit = BIT(SW1_PIN), .name = "BTN2" },
+    { .id = BTN3_ID, .pin = SW2_PIN, .bit = BIT(SW2_PIN), .name = "BTN3" },
+    { .id = BTN4_ID, .pin = SW3_PIN, .bit = BIT(SW3_PIN), .name = "BTN4" },
 };
 #define BUTTONS_COUNT (sizeof(button_info)/sizeof(button_info_t))
+
+static const button_info_t unknown = {.id=INVALID_ID, .pin=0 , .bit= 0, .name= "???"};
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 static struct device * gpiob;
 
+static struct gpio_callback buttons_cb;
+
+typedef struct {
+    struct k_work      work;
+    button_info_t    * current;
+    buttons_notify_t   notify;
+} buttons_t;
+
+static buttons_t  buttons;
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-int buttons_get_state(int id)
+static const button_info_t * button_get_info(u32_t pins)
 {
-    int state;
+    for (int i=0; i < BUTTONS_COUNT; i++) {
+        if (button_info[i].bit & pins) {
+            return &button_info[i];
+        }
+    }
+    return &unknown;
+}
 
-    if (id <0 || id >= BUTTONS_COUNT) {
-        return -1;
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void buttons_event(struct device * gpiob, struct gpio_callback * cb, u32_t pins)
+{
+    buttons.current = (button_info_t *) button_get_info(pins);
+    if (buttons.current->id == INVALID_ID) {
+        return;
     }
 
-    gpio_pin_read(gpiob, button_info[id].pin, &state);
+    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
 
-    if (state == 0) {  // note button-pressed state inversion
-        return button_info[id].id;
+    k_work_submit(&buttons.work);
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+static void buttons_worker(struct k_work * work)
+{
+    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
+
+    if (buttons.notify) {
+        buttons.notify(buttons.current->id);
     }
-    return NO_PRESS;
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void buttons_register_notify_handler(buttons_notify_t notify)
+{
+    buttons.notify = notify;
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void buttons_unregister_notify_handler(void)
+{
+    buttons.notify = NULL;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -79,8 +127,21 @@ void buttons_init(void)
         return;
     }
 
-    gpio_pin_configure(gpiob, SW1_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
-    gpio_pin_configure(gpiob, SW2_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
-    gpio_pin_configure(gpiob, SW3_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
-    gpio_pin_configure(gpiob, SW4_PIN, GPIO_DIR_IN | PULL_UP | ACTIVE);
+    k_work_init(&buttons.work, buttons_worker);
+
+    gpio_pin_configure(gpiob, SW0_PIN, GPIO_INPUT | DT_ALIAS_SW0_GPIOS_FLAGS);
+    gpio_pin_configure(gpiob, SW1_PIN, GPIO_INPUT | DT_ALIAS_SW1_GPIOS_FLAGS);
+    gpio_pin_configure(gpiob, SW2_PIN, GPIO_INPUT | DT_ALIAS_SW2_GPIOS_FLAGS);
+    gpio_pin_configure(gpiob, SW3_PIN, GPIO_INPUT | DT_ALIAS_SW3_GPIOS_FLAGS);
+
+    gpio_pin_interrupt_configure(gpiob, SW0_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW1_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW2_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW3_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+
+    gpio_init_callback(&buttons_cb, buttons_event,
+                       BIT(SW0_PIN) | BIT(SW1_PIN) | BIT(SW2_PIN) | BIT(SW3_PIN));
+
+    gpio_add_callback(gpiob, &buttons_cb);
+
 }
