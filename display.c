@@ -178,6 +178,7 @@ void display_btn_event(buttons_id_t btn_id)
             if (screen_id >= SCREEN_COUNT)
                 screen_id = 0;
             lv_scr_load(screens[screen_id].screen);
+            param_id = 0;
             LOG_INF("BTN1: screen_id(%d)", screen_id);
             break;
 
