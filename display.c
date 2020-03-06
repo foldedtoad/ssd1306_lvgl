@@ -323,7 +323,7 @@ int display_init(void)
     lv_init();
 
     display_screens_init();
-
+  
     /*
      *  First screen will be screen1
      */
