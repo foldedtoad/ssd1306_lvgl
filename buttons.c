@@ -8,6 +8,8 @@
 #include <sys/printk.h>
 #include <inttypes.h>
 
+#include "buttons.h"
+
 #include <logging/log.h>
 LOG_MODULE_REGISTER(buttons, 3);
 
@@ -60,6 +62,14 @@ static struct gpio_callback gpio_cb_1;
 static struct gpio_callback gpio_cb_2;
 static struct gpio_callback gpio_cb_3;
 
+typedef struct {
+    struct k_work      work;
+    button_info_t    * current;
+    buttons_notify_t   notify;
+} buttons_t;
+
+static buttons_t  buttons;
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -78,11 +88,42 @@ static const button_info_t * button_get_info(uint32_t pins)
 /*---------------------------------------------------------------------------*/
 void button_event(struct device * gpiob, struct gpio_callback * cb, uint32_t pins)
 {
-    static const button_info_t * info;
+    buttons.current = (button_info_t *) button_get_info(pins);
+    if (buttons.current->id == INVALID_ID) {
+        return;
+    }
 
-    info = button_get_info(pins);
+    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
 
-    LOG_INF("Button: %s pin(%d)", info->name, info->pin);
+    k_work_submit(&buttons.work);
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+static void buttons_worker(struct k_work * work)
+{
+    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
+
+    if (buttons.notify) {
+        buttons.notify(buttons.current->id);
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void buttons_register_notify_handler(buttons_notify_t notify)
+{
+    buttons.notify = notify;
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void buttons_unregister_notify_handler(void)
+{
+    buttons.notify = NULL;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -95,6 +136,8 @@ void buttons_init(void)
         LOG_ERR("device not found. %s", SW_GPIO_NAME);
         return;
     }
+
+    k_work_init(&buttons.work, buttons_worker);
 
     gpio_pin_configure(gpiob, SW_0, GPIO_INPUT | GPIO_INT_ENABLE | PULL_UP | EDGE);
     gpio_pin_configure(gpiob, SW_1, GPIO_INPUT | GPIO_INT_ENABLE | PULL_UP | EDGE);

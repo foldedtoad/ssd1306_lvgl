@@ -4,8 +4,8 @@
 #include <zephyr.h>
 #include <sys/printk.h>
 
-#include "buttons.h"
 #include "display.h"
+#include "buttons.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(main, 3);
@@ -23,7 +23,7 @@ void main_thread(void * id, void * unused1, void * unused2)
     buttons_init();
 
     if (display_init() < 0)
-    	return;
+        return;
 }
 
 K_THREAD_DEFINE(main_id, STACKSIZE, main_thread, 
