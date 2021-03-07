@@ -56,7 +56,7 @@ static const button_info_t unknown = {.id=0, .pin=0 , .bit= 0, .name= "???"};
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-static struct device * gpiob;
+static const struct device * gpiob;
 static struct gpio_callback gpio_cb_0;
 static struct gpio_callback gpio_cb_1;
 static struct gpio_callback gpio_cb_2;
@@ -86,7 +86,9 @@ static const button_info_t * button_get_info(uint32_t pins)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-void button_event(struct device * gpiob, struct gpio_callback * cb, uint32_t pins)
+void button_event(const struct device * gpiob,
+                  struct gpio_callback * cb,
+                  uint32_t pins)
 {
     buttons.current = (button_info_t *) button_get_info(pins);
     if (buttons.current->id == INVALID_ID) {
@@ -139,10 +141,21 @@ void buttons_init(void)
 
     k_work_init(&buttons.work, buttons_worker);
 
-    gpio_pin_configure(gpiob, SW_0, GPIO_INPUT | GPIO_INT_ENABLE | PULL_UP | EDGE);
-    gpio_pin_configure(gpiob, SW_1, GPIO_INPUT | GPIO_INT_ENABLE | PULL_UP | EDGE);
-    gpio_pin_configure(gpiob, SW_2, GPIO_INPUT | GPIO_INT_ENABLE | PULL_UP | EDGE);
-    gpio_pin_configure(gpiob, SW_3, GPIO_INPUT | GPIO_INT_ENABLE | PULL_UP | EDGE);
+    /* Init Button Interrupt */
+    int flags = (GPIO_INPUT      | 
+                 GPIO_ACTIVE_LOW |  
+                 GPIO_PULL_UP    | 
+                 GPIO_INT_EDGE);
+
+    gpio_pin_configure(gpiob, SW_0, flags);
+    gpio_pin_configure(gpiob, SW_1, flags);
+    gpio_pin_configure(gpiob, SW_2, flags);
+    gpio_pin_configure(gpiob, SW_3, flags);
+
+    gpio_pin_interrupt_configure(gpiob, SW_0, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW_1, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW_2, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW_3, GPIO_INT_EDGE_TO_ACTIVE);
 
     gpio_init_callback(&gpio_cb_0, button_event, BIT(SW_0));
     gpio_init_callback(&gpio_cb_1, button_event, BIT(SW_1));

@@ -1,7 +1,7 @@
 # ssd1306_zephyr
 
 ## Overview
-This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr version 2.3.99
+This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr version 2.4.
 In theory, this project could be ported to other Zephyr-supported boards, but this has not (yet) been tried.
 
 Also this project shows how to include custom fonts.
@@ -14,6 +14,7 @@ Below is a list hardware components.
  * Adafruit 128x32 I2C OLED display (SSD1306)
  * Bread board
  * Ribbon cable with male headers. 
+ * (optional) Adafruit pshield board. (ProtoShield v6)
 
 Wire connections as follows
 
@@ -24,7 +25,7 @@ Wire connections as follows
  * GND   <--> GND
 
 ## Software
-This project was built with Zephyr 2.3.99 and selects the Nordic PCA10040 board ().  
+This project was built with Zephyr 2.4 and selects the Nordic PCA10040 board ().  
 Change the "`set(BOARD nrf52dk_nrf52832)`" in the CMakeFile.txt for other supported boards. 
 
 The following componets need to be configured though "make menuconfig".  
@@ -41,5 +42,14 @@ The difficult parts are setting up the I2C driver for the target board. In this 
 
 
 ## Operation
-The display.c program is rather simple, in that it runs a loop which writes out four different strings to the display: see the *display_play()* function.
+On the Nordic nRF52832 (PCA10040) board, the four buttons are assigned the following actions:
+* Button1 -- Rotates the currently displayed page: 1-4 pages
+* Button2 -- Within the currently displayed page, rotate though the editable fields.
+* Button3 -- Within the current field, increase the value by step side. (see display.c ~line 101-118)
+* Button4 -- Within the current field, decrease the value by step side.  
 
+Screens (Pages) --
+* Pg1 -- Shows slider widget.  Use Button3 or Button4 to move slider.
+* Pg2 -- Shows two editable fields and an icon (pacman). Use Button3 or Button4 to change field value.
+* Pg3 -- Shows three labled fields. Use Button2 to select field.  Use Button3 or Button4 to change value.
+* Pg4 -- Shows only a simple graphic icon (zombie eye).
