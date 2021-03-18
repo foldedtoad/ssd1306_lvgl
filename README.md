@@ -1,7 +1,7 @@
 # ssd1306_zephyr
 
 ## Overview
-This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr version 2.4.
+This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr version 2.5.
 In theory, this project could be ported to other Zephyr-supported boards, but this has not (yet) been tried.
 
 Also this project shows how to include custom fonts.
@@ -25,7 +25,7 @@ Wire connections as follows
  * GND   <--> GND
 
 ## Software
-This project was built with Zephyr 2.4 and selects the Nordic PCA10040 board ().  
+This project was built with Zephyr 2.5 and selects the Nordic PCA10040 board ().  
 Change the "`set(BOARD nrf52dk_nrf52832)`" in the CMakeFile.txt for other supported boards. 
 
 The following componets need to be configured though "make menuconfig".  
