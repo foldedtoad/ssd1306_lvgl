@@ -16,7 +16,7 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
 
-static struct device * display_dev;
+static const struct device * display_dev;
 
 #define SCREEN_ID_0    0
 #define SCREEN_ID_1    1
@@ -216,9 +216,6 @@ void display_screens_init(void)
     screens[1].screen = lv_obj_create(NULL, NULL);
     screens[2].screen = lv_obj_create(NULL, NULL);
     screens[3].screen = lv_obj_create(NULL, NULL);
-
-    lv_theme_t * mono = lv_theme_mono_init(0, NULL);
-    lv_theme_set_current(mono);
 
     /*
      *  build basic screen0
