@@ -151,12 +151,13 @@ void display_param_update(int screen_id, int param_id, bool inc)
     if (strcmp("lv_label", types.type[0]) == 0) {
         static char value[4];
         snprintf(value, sizeof(value), "%u", *param->value);
-        lv_label_set_text(*param->object, value);
+        lv_label_set_text(*param->object, value);;
         return;
     }
 
     if (strcmp("lv_slider", types.type[0]) == 0) {
         lv_slider_set_value(*param->object, *param->value, LV_ANIM_ON);
+        LOG_INF("%s: value %d", __func__, lv_slider_get_value(*param->object));
         return;
     }
 }
@@ -169,8 +170,6 @@ void display_btn_event(buttons_id_t btn_id)
     static int screen_id = 0;  // init to first screen id
     static int param_id  = 0;  // init to first parameter index
 
-    //LOG_INF("%s: BTN%d", __func__, btn_id);
-    
     switch (btn_id) {
 
         case BTN1_ID:
@@ -199,11 +198,21 @@ void display_btn_event(buttons_id_t btn_id)
         case BTN4_ID:
             if (screens[screen_id].count > 0) {
                 display_param_update(screen_id, param_id, false);
-                LOG_INF("BTN3: -%d", screens[screen_id].params[param_id].step);
+                LOG_INF("BTN4: -%d", screens[screen_id].params[param_id].step);
             }
 
         default:
             break;
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
+void display_slider_event(lv_obj_t * slider, lv_event_t event)
+{
+    if (event == LV_EVENT_VALUE_CHANGED) {
+        LOG_INF("%s: event(%d)", __func__, event);
     }
 }
 
@@ -228,6 +237,8 @@ void display_screens_init(void)
     screen0_slider_obj = lv_slider_create(lv_scr_act(), NULL);
     lv_obj_set_height(screen0_slider_obj, 10);
     lv_obj_set_width(screen0_slider_obj, 110);
+    //lv_obj_set_event_cb(screen0_slider_obj, display_slider_event);
+    lv_slider_set_range(screen0_slider_obj, 0, 100);
     lv_obj_align(screen0_slider_obj, NULL, LV_ALIGN_CENTER, 0, 0);
     lv_slider_set_value(screen0_slider_obj, 15, LV_ANIM_ON);
     screen0_slider_value = 15;
@@ -287,11 +298,6 @@ void display_screens_init(void)
     lv_label_set_text(screen2_label2_obj, "0");
     lv_obj_align(screen2_label2_obj, screens[2].screen, LV_ALIGN_IN_BOTTOM_RIGHT, -45, -2);
 
-#if 0
-    lv_obj_t * icon_2 = lv_img_create(lv_scr_act(), NULL);
-    lv_img_set_src(icon_2, &icon2);
-#endif
-
     /*
      *  build basic screen3
      */
@@ -317,12 +323,10 @@ int display_init(void)
         return -1;
     }
 
-    lv_init();
-
     display_screens_init();
   
     /*
-     *  First screen will be screen1
+     *  First screen will be screen0
      */
     lv_scr_load(screens[0].screen);
 
