@@ -15,4 +15,4 @@ target_sources(app PRIVATE icon3.c)
 
 target_include_directories(app PRIVATE ./)
 
-zephyr_compile_options(-save-temps)
+# zephyr_compile_options(-save-temps)
