@@ -3,21 +3,23 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <device.h>
-#include <drivers/display.h>
+#include <zephyr/kernel.h> 
+#include <zephyr/device.h>
+#include <zephyr/drivers/display.h>
 #include <lvgl.h>
 #include <stdio.h>
 #include <string.h>
-#include <zephyr.h>
 
 #include "display.h"
 #include "buttons.h"
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(display, 3);
+
 
 static const struct device * display_dev;
 
+#if 0 // robin
 #define SCREEN_ID_0    0
 #define SCREEN_ID_1    1
 #define SCREEN_ID_2    2
@@ -30,6 +32,7 @@ static const struct device * display_dev;
 #define PARAM_ID_3      3
 #define PARAM_COUNT     3  //4
 
+#endif
 
 void display_timer_handler(struct k_timer * timer);
 void display_task_handler(struct k_work * work);
@@ -40,17 +43,22 @@ K_WORK_DEFINE(display_work, display_task_handler);
 
 #define TICK_PERIOD   (10)
 
+#if 0
+
 LV_IMG_DECLARE(icon1);
 LV_IMG_DECLARE(icon2);
 LV_IMG_DECLARE(icon3);
 
+#endif
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 void display_task_handler(struct k_work * work)
 {
+#if 0    
     lv_tick_inc(TICK_PERIOD);
     lv_task_handler();
+#endif
 }
 
 /*---------------------------------------------------------------------------*/
@@ -61,6 +69,7 @@ void display_timer_handler(struct k_timer * timer)
     k_work_submit(&display_work);
 }
 
+#if 0
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -311,18 +320,20 @@ void display_screens_init(void)
     lv_obj_align(icon_3, NULL, LV_ALIGN_CENTER, 0, 0);
 }
 
+#endif // robin
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 int display_init(void)
 {
-    display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
-
+    display_dev = device_get_binding(DT_NODE_FULL_NAME(DT_ALIAS(display)));
     if (display_dev == NULL) {
-        LOG_ERR("device not found. %s", CONFIG_LVGL_DISPLAY_DEV_NAME);
+        //LOG_ERR("device not found. %s", DT_ALIAS(display));
         return -1;
     }
 
+#if 0
     display_screens_init();
   
     /*
@@ -339,6 +350,7 @@ int display_init(void)
      * Register for button press notifications.
      */
     buttons_register_notify_handler(display_btn_event);
+#endif
 
     /*
      *  Start task handler timer loop

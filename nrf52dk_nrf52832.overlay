@@ -4,17 +4,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+&pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA,  0, 26)>,
+                    <NRF_PSEL(TWIM_SCL,  0, 27)>;
+            bias-pull-up;
+        };
+    };
+
+    i2c0_sleep: i2c0_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA,  0, 26)>,
+                    <NRF_PSEL(TWIM_SCL,  0, 27)>;
+            low-power-enable;
+        };
+    };
+};
+
 arduino_i2c: &i2c0 {
     compatible = "nordic,nrf-twi";
     status = "okay";
-    clock-frequency = <I2C_BITRATE_FAST>;
-    sda-gpios = <&gpio0 26 0>;
-    scl-gpios = <&gpio0 27 0>;
 
-    ssd1306@3c {
+    ssd1306_ssd1306_128x32: ssd1306@3c {
         compatible = "solomon,ssd1306fb";
         reg = <0x3c>;
-        label = "SSD1306";
         height = <32>;
         width  = <128>;
         segment-offset  = <0>;
@@ -25,5 +39,11 @@ arduino_i2c: &i2c0 {
         segment-remap;
         com-invdir;
         com-sequential;
+    };
+};
+
+/ {
+    aliases {
+        display = &ssd1306_ssd1306_128x32;
     };
 };

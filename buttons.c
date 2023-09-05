@@ -1,16 +1,16 @@
 /*
  *   buttons.c
  */
-#include <zephyr.h>
-#include <device.h>
-#include <drivers/gpio.h>
-#include <sys/util.h>
-#include <sys/printk.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/sys/util.h>
+#include <zephyr/sys/printk.h>
 #include <inttypes.h>
 
 #include "buttons.h"
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(buttons, 3);
 
 /*---------------------------------------------------------------------------*/
@@ -43,24 +43,30 @@ typedef struct {
     char  * name;
 } button_info_t; 
 
+#define SW_GPIO_DEV    DT_NODELABEL(gpio0)
+
+#define SW0_PIN        DT_GPIO_PIN(DT_ALIAS(sw0), gpios)
+#define SW1_PIN        DT_GPIO_PIN(DT_ALIAS(sw1), gpios)
+#define SW2_PIN        DT_GPIO_PIN(DT_ALIAS(sw2), gpios)
+#define SW3_PIN        DT_GPIO_PIN(DT_ALIAS(sw3), gpios)
+
 static const button_info_t button_info [] = {
-    { .id = 1, .pin = SW_0, .bit = 0x00002000, .name = "SW1" },
-    { .id = 2, .pin = SW_1, .bit = 0x00004000, .name = "SW2" },
-    { .id = 3, .pin = SW_2, .bit = 0x00008000, .name = "SW3" },
-    { .id = 4, .pin = SW_3, .bit = 0x00010000, .name = "SW4" },
+    { .id = BTN1_ID, .pin = SW0_PIN, .bit = BIT(SW0_PIN), .name = "BTN1" },
+    { .id = BTN2_ID, .pin = SW1_PIN, .bit = BIT(SW1_PIN), .name = "BTN2" },
+    { .id = BTN3_ID, .pin = SW2_PIN, .bit = BIT(SW2_PIN), .name = "BTN3" },
+    { .id = BTN4_ID, .pin = SW3_PIN, .bit = BIT(SW3_PIN), .name = "BTN4" },
 };
+
 #define BUTTONS_COUNT (sizeof(button_info)/sizeof(button_info_t))
 
-static const button_info_t unknown = {.id=0, .pin=0 , .bit= 0, .name= "???"};
+static const button_info_t unknown = {.id=INVALID_ID, .pin=0 , .bit= 0, .name= "???"};
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 static const struct device * gpiob;
-static struct gpio_callback gpio_cb_0;
-static struct gpio_callback gpio_cb_1;
-static struct gpio_callback gpio_cb_2;
-static struct gpio_callback gpio_cb_3;
+
+static struct gpio_callback buttons_cb;
 
 typedef struct {
     struct k_work      work;
@@ -86,9 +92,9 @@ static const button_info_t * button_get_info(uint32_t pins)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-void button_event(const struct device * gpiob,
-                  struct gpio_callback * cb,
-                  uint32_t pins)
+void buttons_event(const struct device * gpiob,
+                   struct gpio_callback * cb,
+                   uint32_t pins)
 {
     buttons.current = (button_info_t *) button_get_info(pins);
     if (buttons.current->id == INVALID_ID) {
@@ -133,9 +139,9 @@ void buttons_unregister_notify_handler(void)
 /*---------------------------------------------------------------------------*/
 void buttons_init(void)
 {
-    gpiob = device_get_binding(SW_GPIO_NAME);
+    gpiob = DEVICE_DT_GET(SW_GPIO_DEV);
     if (!gpiob) {
-        LOG_ERR("device not found. %s", SW_GPIO_NAME);
+        LOG_ERR("device not found. %s", DEVICE_DT_NAME(SW_GPIO_DEV));
         return;
     }
 
@@ -147,23 +153,19 @@ void buttons_init(void)
                  GPIO_PULL_UP    | 
                  GPIO_INT_EDGE);
 
-    gpio_pin_configure(gpiob, SW_0, flags);
-    gpio_pin_configure(gpiob, SW_1, flags);
-    gpio_pin_configure(gpiob, SW_2, flags);
-    gpio_pin_configure(gpiob, SW_3, flags);
+    gpio_pin_configure(gpiob, SW0_PIN, flags);
+    gpio_pin_configure(gpiob, SW1_PIN, flags);
+    gpio_pin_configure(gpiob, SW2_PIN, flags);
+    gpio_pin_configure(gpiob, SW3_PIN, flags);
 
-    gpio_pin_interrupt_configure(gpiob, SW_0, GPIO_INT_EDGE_TO_ACTIVE);
-    gpio_pin_interrupt_configure(gpiob, SW_1, GPIO_INT_EDGE_TO_ACTIVE);
-    gpio_pin_interrupt_configure(gpiob, SW_2, GPIO_INT_EDGE_TO_ACTIVE);
-    gpio_pin_interrupt_configure(gpiob, SW_3, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW0_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW1_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW2_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiob, SW3_PIN, GPIO_INT_EDGE_TO_ACTIVE);
 
-    gpio_init_callback(&gpio_cb_0, button_event, BIT(SW_0));
-    gpio_init_callback(&gpio_cb_1, button_event, BIT(SW_1));
-    gpio_init_callback(&gpio_cb_2, button_event, BIT(SW_2));
-    gpio_init_callback(&gpio_cb_3, button_event, BIT(SW_3));
-
-    gpio_add_callback(gpiob, &gpio_cb_0);
-    gpio_add_callback(gpiob, &gpio_cb_1);
-    gpio_add_callback(gpiob, &gpio_cb_2);
-    gpio_add_callback(gpiob, &gpio_cb_3);
+    gpio_init_callback(&buttons_cb, buttons_event,
+                       BIT(SW0_PIN) |
+                       BIT(SW1_PIN) |
+                       BIT(SW2_PIN) |
+                       BIT(SW3_PIN) );
 }
