@@ -31,26 +31,24 @@ static const struct device * display_dev;
 #define PARAM_ID_3      3
 #define PARAM_COUNT     3  //4
 
-//void display_timer_handler(struct k_timer * timer);
-//void display_task_handler(struct k_work * work);
-
-//K_TIMER_DEFINE(display_timer, display_timer_handler, NULL);
-
-//K_WORK_DEFINE(display_work, display_task_handler);
-
-//#define TICK_PERIOD   (10)
-
 LV_IMG_DECLARE(icon1);
 LV_IMG_DECLARE(icon2);
 LV_IMG_DECLARE(icon3);
 
-#if 0
+void display_timer_handler(struct k_timer * timer);
+void display_task_handler(struct k_work * work);
+
+K_TIMER_DEFINE(display_timer, display_timer_handler, NULL);
+
+K_WORK_DEFINE(display_work, display_task_handler);
+
+#define TICK_PERIOD   (10)
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 void display_task_handler(struct k_work * work)
 {  
-    lv_tick_inc(TICK_PERIOD);
     lv_task_handler();
 }
 
@@ -61,7 +59,6 @@ void display_timer_handler(struct k_timer * timer)
 {
     k_work_submit(&display_work);
 }
-#endif
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -201,18 +198,6 @@ void display_btn_event(buttons_id_t btn_id)
     }
 }
 
-#if 0
-/*---------------------------------------------------------------------------*/
-/*                                                                           */
-/*---------------------------------------------------------------------------*/
-void display_slider_event(lv_obj_t * slider, lv_event_t event)
-{
-    if (event == LV_EVENT_VALUE_CHANGED) {
-        LOG_INF("%s: event(%d)", __func__, event);
-    }
-}
-#endif
-
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -234,7 +219,6 @@ void display_screens_init(void)
     screen0_slider_obj = lv_slider_create(lv_scr_act());
     lv_obj_set_height(screen0_slider_obj, 10);
     lv_obj_set_width(screen0_slider_obj, 110);
-    //lv_obj_set_event_cb(screen0_slider_obj, display_slider_event);
     lv_slider_set_range(screen0_slider_obj, 0, 100);
     lv_obj_align_to(screen0_slider_obj, NULL, LV_ALIGN_CENTER, 0, 0);
     lv_slider_set_value(screen0_slider_obj, 15, LV_ANIM_ON);
@@ -313,14 +297,15 @@ void display_screens_init(void)
 /*---------------------------------------------------------------------------*/
 int display_init(void)
 {
-    display_dev = device_get_binding(DT_NODE_FULL_NAME(DT_ALIAS(display)));
+    display_dev = device_get_binding(DT_NODE_FULL_NAME(DT_CHOSEN(zephyr_display)));
     if (display_dev == NULL) {
-        LOG_ERR("device not found. %s", DT_NODE_FULL_NAME(DT_ALIAS(display)));
+        LOG_ERR("Display device not found.");
         return -1;
     }
+    LOG_INF("Display device: %s", DT_NODE_FULL_NAME(DT_CHOSEN(zephyr_display)));
 
     display_screens_init();
-  
+
     /*
      *  First screen will be screen0
      */
@@ -339,7 +324,7 @@ int display_init(void)
     /*
      *  Start task handler timer loop
      */
- //   k_timer_start(&display_timer, K_MSEC(TICK_PERIOD), K_MSEC(TICK_PERIOD));
+    k_timer_start(&display_timer, K_MSEC(TICK_PERIOD), K_MSEC(TICK_PERIOD));
 
     return 0;
 };

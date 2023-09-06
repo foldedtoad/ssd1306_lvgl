@@ -101,7 +101,7 @@ void buttons_event(const struct device * gpiob,
         return;
     }
 
-    LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
+    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
 
     k_work_submit(&buttons.work);
 }
@@ -111,7 +111,7 @@ void buttons_event(const struct device * gpiob,
 /*---------------------------------------------------------------------------*/
 static void buttons_worker(struct k_work * work)
 {
-    LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
+    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
 
     if (buttons.notify) {
         buttons.notify(buttons.current->id);
