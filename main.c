@@ -1,13 +1,13 @@
 /* 
  *  main.c - Application main entry point 
  */
-#include <zephyr.h>
-#include <sys/printk.h>
+#include <zephyr/kernel.h>
+#include <zephyr/sys/printk.h>
 
 #include "display.h"
 #include "buttons.h"
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main, 3);
 
 #define STACKSIZE 1024

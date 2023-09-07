@@ -1,7 +1,7 @@
 # ssd1306_zephyr
 
 ## Overview
-This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr version 2.5.
+This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr V3.4.99 which provides LVGL V8.2.0 as a module library.  
 In theory, this project could be ported to other Zephyr-supported boards, but this has not (yet) been tried.
 
 Also this project shows how to include custom fonts.
@@ -25,7 +25,7 @@ Wire connections as follows
  * GND   <--> GND
 
 ## Software
-This project was built with Zephyr 2.5 and selects the Nordic PCA10040 board ().  
+This project was built with Zephyr V3.4 and selects the Nordic PCA10040 board ().  
 Change the "`set(BOARD nrf52dk_nrf52832)`" in the CMakeFile.txt for other supported boards. 
 
 The following componets need to be configured though "make menuconfig".  
@@ -39,13 +39,14 @@ The tricky part of the software configuration seems to be in setting up the **.o
 Hopefully, this project can be used as an example of how to navigate though this procedure.
 
 The difficult parts are setting up the I2C driver for the target board. In this project the nRF52 I2C support is well-known and relatively straight-forward in configuring.  Other SOCs and boards are not always so easy.
-
+  
+The font can be changed via the prj.conf file: MONTSERRAT is the font type provided with LVGL.  The smallest font size is 8, which is almost unreadably small.  Font size 12 is somewhat better, but overfills screen at times.  
 
 ## Operation
 On the Nordic nRF52832 (PCA10040) board, the four buttons are assigned the following actions:
 * Button1 -- Rotates the currently displayed page: 1-4 pages
 * Button2 -- Within the currently displayed page, rotate though the editable fields.
-* Button3 -- Within the current field, increase the value by step side. (see display.c ~line 101-118)
+* Button3 -- Within the current field, increase the value by step side. 
 * Button4 -- Within the current field, decrease the value by step side.  
 
 Screens (Pages) --
