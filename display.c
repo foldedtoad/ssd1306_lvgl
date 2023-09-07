@@ -201,12 +201,47 @@ void display_btn_event(buttons_id_t btn_id)
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
+#if 0
+void display_slider_event(lv_event_t * event)
+{
+    lv_event_code_t code = lv_event_get_code(event);
+
+    if (code == LV_EVENT_VALUE_CHANGED) {
+        LOG_INF("%s: event(%d)", __func__, code);
+    }
+}
+#endif
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*---------------------------------------------------------------------------*/
 void display_screens_init(void)
 {
     screens[0].screen = lv_obj_create(NULL);
     screens[1].screen = lv_obj_create(NULL);
     screens[2].screen = lv_obj_create(NULL);
     screens[3].screen = lv_obj_create(NULL);
+
+    static lv_style_t style_main;
+    static lv_style_t style_indicator;
+    static lv_style_t style_knob;
+
+    lv_style_init(&style_main);
+    lv_style_set_bg_opa(&style_main, LV_OPA_COVER);
+    lv_style_set_bg_color(&style_main, lv_color_hex3(0xbbb));
+
+    lv_style_init(&style_indicator);
+    lv_style_set_bg_opa(&style_indicator, LV_OPA_COVER);
+    lv_style_set_text_color(&style_indicator, lv_color_white());
+    lv_style_set_bg_color(&style_indicator, lv_color_black());
+    lv_style_set_radius(&style_indicator, LV_RADIUS_CIRCLE);
+    //lv_style_set_transition(&style_indicator, &transition_dsc);
+
+    lv_style_init(&style_knob);
+    lv_style_set_text_color(&style_knob, lv_color_white());
+    lv_style_set_bg_color(&style_knob, lv_color_black());
+    lv_style_set_border_width(&style_knob, 2);
+    //lv_style_set_transition(&style_knob, &transition_dsc);
 
     /*
      *  build basic screen0
@@ -217,8 +252,11 @@ void display_screens_init(void)
     lv_obj_align_to(screen0_label, screens[0].screen, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     screen0_slider_obj = lv_slider_create(lv_scr_act());
-    lv_obj_set_height(screen0_slider_obj, 10);
+    lv_obj_set_height(screen0_slider_obj, 10); 
     lv_obj_set_width(screen0_slider_obj, 110);
+    lv_obj_add_style(screen0_slider_obj, &style_main, LV_PART_MAIN);
+    lv_obj_add_style(screen0_slider_obj, &style_indicator, LV_PART_INDICATOR);
+    lv_obj_add_style(screen0_slider_obj, &style_knob, LV_PART_KNOB);
     lv_slider_set_range(screen0_slider_obj, 0, 100);
     lv_obj_align_to(screen0_slider_obj, NULL, LV_ALIGN_CENTER, 0, 0);
     lv_slider_set_value(screen0_slider_obj, 15, LV_ANIM_ON);

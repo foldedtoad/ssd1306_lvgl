@@ -32,6 +32,8 @@ LOG_MODULE_REGISTER(buttons, 3);
 #define EDGE            (GPIO_INT_EDGE | GPIO_INT_LOW_0)
 #define PULL_UP         GPIO_PULL_UP
 
+#define BUTTON_DEBOUNCE_DELAY_MS 350
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
@@ -96,8 +98,18 @@ void buttons_event(const struct device * gpiob,
                    struct gpio_callback * cb,
                    uint32_t pins)
 {
+    static uint32_t curr_time;
+    static uint32_t last_time;
+
     buttons.current = (button_info_t *) button_get_info(pins);
     if (buttons.current->id == INVALID_ID) {
+        return;
+    }
+
+    curr_time = k_uptime_get_32();
+
+    if (curr_time < last_time + BUTTON_DEBOUNCE_DELAY_MS) {
+        last_time = curr_time;
         return;
     }
 
