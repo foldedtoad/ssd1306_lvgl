@@ -40,7 +40,7 @@ Hopefully, this project can be used as an example of how to navigate though this
 
 The difficult parts are setting up the I2C driver for the target board. In this project the nRF52 I2C support is well-known and relatively straight-forward in configuring.  Other SOCs and boards are not always so easy.
   
-The font can be changed via the prj.conf file: MONTSERRAT is the font type provided with LVGL.  The smallest font size is 8, which is almost unreadably small.  Font size 12 is somewhat better, but overfills screen at times.  
+The font can be changed via the prj.conf file: UNSCII_8 is the font type provided with LVGL.  
 
 ## Operation
 On the Nordic nRF52832 (PCA10040) board, the four buttons are assigned the following actions:
