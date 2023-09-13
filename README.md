@@ -4,8 +4,6 @@
 This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr V3.4.99 which provides LVGL V8.2.0 as a module library.  
 In theory, this project could be ported to other Zephyr-supported boards, but this has not (yet) been tried.
 
-Also this project shows how to include custom fonts.
-
 ## Hardware
 See photo in *docs* directory for view of hardware configuration.
 Below is a list hardware components.
@@ -16,7 +14,7 @@ Below is a list hardware components.
  * Ribbon cable with male headers. 
  * (optional) Adafruit pshield board. (ProtoShield v6)
 
-Wire connections as follows
+Wire connections for the PCA10040 board are as follows
 
  * P0.27 <--> SCL
  * P0.26 <--> SDA
@@ -41,6 +39,16 @@ Hopefully, this project can be used as an example of how to navigate though this
 The difficult parts are setting up the I2C driver for the target board. In this project the nRF52 I2C support is well-known and relatively straight-forward in configuring.  Other SOCs and boards are not always so easy.
   
 The font can be changed via the prj.conf file: UNSCII_8 is the font type provided with LVGL.  
+
+## Build Directions
+While the standard method for building Zephyr projects is with West, an alternative "Cmake" method is used here.
+* $> cd [project root directory]
+* $> ./configure.sh
+* $> cd build
+* $> make
+
+While loading and debugging can be done with OpenOCD, this project used Segger's Ozone software for debugging.
+
 
 ## Operation
 On the Nordic nRF52832 (PCA10040) board, the four buttons are assigned the following actions:
