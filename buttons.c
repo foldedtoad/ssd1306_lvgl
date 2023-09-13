@@ -63,10 +63,12 @@ static const button_info_t button_info [] = {
 
 static const button_info_t unknown = {.id=INVALID_ID, .pin=0 , .bit= 0, .name= "???"};
 
+#define DEBOUNCE_MS 150
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
-static const struct device * gpiob;
+static const struct device * gpiodev;
 
 static struct gpio_callback buttons_cb;
 
@@ -98,24 +100,17 @@ void buttons_event(const struct device * gpiob,
                    struct gpio_callback * cb,
                    uint32_t pins)
 {
-    static uint32_t curr_time;
-    static uint32_t last_time;
-
     buttons.current = (button_info_t *) button_get_info(pins);
     if (buttons.current->id == INVALID_ID) {
         return;
     }
 
-    curr_time = k_uptime_get_32();
-
-    if (curr_time < last_time + BUTTON_DEBOUNCE_DELAY_MS) {
-        last_time = curr_time;
-        return;
+    if (gpio_pin_get(gpiodev, buttons.current->pin) == 1) {
+        k_msleep(DEBOUNCE_MS);
+        if (gpio_pin_get(gpiodev, buttons.current->pin) == 1) {
+            k_work_submit(&buttons.work);
+        }
     }
-
-    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
-
-    k_work_submit(&buttons.work);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -123,8 +118,6 @@ void buttons_event(const struct device * gpiob,
 /*---------------------------------------------------------------------------*/
 static void buttons_worker(struct k_work * work)
 {
-    //LOG_INF("%s pin(%d)", buttons.current->name, buttons.current->pin);
-
     if (buttons.notify) {
         buttons.notify(buttons.current->id);
     }
@@ -151,11 +144,11 @@ void buttons_unregister_notify_handler(void)
 /*---------------------------------------------------------------------------*/
 void buttons_init(void)
 {
-    gpiob = DEVICE_DT_GET(SW_GPIO_DEV);
-    if (!gpiob) {
+    gpiodev = DEVICE_DT_GET(SW_GPIO_DEV);
+    if (!gpiodev) {
         LOG_ERR("device not found. %s", DEVICE_DT_NAME(SW_GPIO_DEV));
         return;
-    }
+    } 
 
     k_work_init(&buttons.work, buttons_worker);
 
@@ -165,15 +158,15 @@ void buttons_init(void)
                  GPIO_PULL_UP    | 
                  GPIO_INT_EDGE);
 
-    gpio_pin_configure(gpiob, SW0_PIN, flags);
-    gpio_pin_configure(gpiob, SW1_PIN, flags);
-    gpio_pin_configure(gpiob, SW2_PIN, flags);
-    gpio_pin_configure(gpiob, SW3_PIN, flags);
+    gpio_pin_configure(gpiodev, SW0_PIN, flags);
+    gpio_pin_configure(gpiodev, SW1_PIN, flags);
+    gpio_pin_configure(gpiodev, SW2_PIN, flags);
+    gpio_pin_configure(gpiodev, SW3_PIN, flags);
 
-    gpio_pin_interrupt_configure(gpiob, SW0_PIN, GPIO_INT_EDGE_TO_ACTIVE);
-    gpio_pin_interrupt_configure(gpiob, SW1_PIN, GPIO_INT_EDGE_TO_ACTIVE);
-    gpio_pin_interrupt_configure(gpiob, SW2_PIN, GPIO_INT_EDGE_TO_ACTIVE);
-    gpio_pin_interrupt_configure(gpiob, SW3_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiodev, SW0_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiodev, SW1_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiodev, SW2_PIN, GPIO_INT_EDGE_TO_ACTIVE);
+    gpio_pin_interrupt_configure(gpiodev, SW3_PIN, GPIO_INT_EDGE_TO_ACTIVE);
 
     gpio_init_callback(&buttons_cb, buttons_event,
                        BIT(SW0_PIN) |
@@ -181,6 +174,5 @@ void buttons_init(void)
                        BIT(SW2_PIN) |
                        BIT(SW3_PIN) );
 
-    gpio_add_callback(gpiob, &buttons_cb);
-
+    gpio_add_callback(gpiodev, &buttons_cb);
 }
