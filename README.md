@@ -49,6 +49,10 @@ While the standard method for building Zephyr projects is with West, an alternat
 
 While loading and debugging can be done with OpenOCD, this project used Segger's Ozone software for debugging.
 
+### Icons
+* icon1.c:  Pacman icon
+* icon2.c:  Wrench icon
+* icon3.c:  Zombie eye icon
 
 ## Operation
 On the Nordic nRF52832 (PCA10040) board, the four buttons are assigned the following actions:
