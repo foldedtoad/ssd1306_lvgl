@@ -1,7 +1,7 @@
 # ssd1306_zephyr
 
 ## Overview
-This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr V3.4.99 which provides LVGL V8.2.0 as a module library.  
+This project implements a SSD1306 OLED display connected to a nRF52 PCA10040 (board: nrf52dk_nrf52832) board running Zephyr V3.5.99 which provides LVGL V8.3.7 as a module library.  
 In theory, this project could be ported to other Zephyr-supported boards, but this has not (yet) been tried.
 
 ## Hardware
