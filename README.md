@@ -23,7 +23,7 @@ Wire connections for the PCA10040 board are as follows
  * GND   <--> GND
 
 ## Software
-This project was built with Zephyr V3.4 and selects the Nordic PCA10040 board ().  
+This project was built with Zephyr V3.5 and selects the Nordic PCA10040 board ().  
 Change the "`set(BOARD nrf52dk_nrf52832)`" in the CMakeFile.txt for other supported boards. 
 
 The following componets need to be configured though "make menuconfig".  
